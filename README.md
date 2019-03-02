@@ -15,4 +15,5 @@ This is a repo for the violence Detection with 3D Convolutional Nets and data ac
 
 ## Current Tasks
 
-- Meet up for the project decision!!
+- [ ] Meet up for the project decisions!!
+- [ ] Convert code into pycharm friendly more modular form

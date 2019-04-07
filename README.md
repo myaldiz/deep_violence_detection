@@ -20,7 +20,7 @@ This is a repo for the violence Detection with 3D Convolutional Nets and data ac
 - https://www.openu.ac.il/home/hassner/data/violentflows/
 - http://visilab.etsii.uclm.es/personas/oscar/FightDetection/index.html
 
-## Current Tasks
+## Notes
 
-- [ ] Meet up for the project decisions!!
-- [ ] Convert code into pycharm friendly more modular form
+- Network is trained on **train/test split 1** of action recognition split of UCF-101
+- [ ] Need to test preprocessing speed difference of extracting frames on the fly vs extracting them before

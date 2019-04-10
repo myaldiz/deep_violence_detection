@@ -1,9 +1,8 @@
 from model import *
-from preprocess import *
-from default_settings import model_settings
-from model import *
 from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
+from preprocess import *
+from default_settings import model_settings
 
 
 def show_running_info(model_settings, duration, step, loss, accuracy):

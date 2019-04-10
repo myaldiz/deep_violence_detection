@@ -4,10 +4,10 @@ import numpy as np
 def get_data_dir(filename):
     dir_videos, label_videos = [], []
     with open(filename, 'r') as input_file:
-    for line in input_file:
-        file_name, label = line.split(' ')
-        dir_videos.append(file_name)
-        label_videos.append(int(label))
+        for line in input_file:
+            file_name, label = line.split(' ')
+            dir_videos.append(file_name)
+            label_videos.append(int(label))
     return dir_videos, label_videos
 
 
@@ -15,23 +15,24 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
     video_indices = list(range(len(dir_videos)))
     random.seed(seed)
     random.shuffle(video_indices)
-    shuffled_video_dirs   = [dir_videos[i] for i in video_indices]
+    shuffled_video_dirs = [dir_videos[i] for i in video_indices]
     shuffled_labels = [label_videos[i] for i in video_indices]
     return shuffled_video_dirs, shuffled_labels
 
 
-def get_frames_data(file_path):
-    ff = ffmpeg.input(file_path).output('pipe:', format='rawvideo', pix_fmt='rgb24')
-    out, err = ff.run(capture_stdout=True)
-    video = np.frombuffer(out, np.uint8)
-    return video
+def read_clip(dirname, model_settings):
+    # Method to get frames from video
+    def get_frames_data(file_path):
+        ff = ffmpeg.input(file_path).output('pipe:', format='rawvideo', pix_fmt='rgb24')
+        out, err = ff.run(capture_stdout=True)
+        video = np.frombuffer(out, np.uint8)
+        return video
 
-
-def read_clip(dirname, start_index, model_settings):
     num_frames_per_clip = model_settings['frames_per_clip']
     crop_size = model_settings['crop_size']
     np_mean = model_settings['np_mean']
-    tmp_data = get_frames_data(dirname, start_index)
+    tmp_data = get_frames_data(dirname)
+
     if(len(tmp_data) == 0):
         return np.array([])
     img_datas=[]

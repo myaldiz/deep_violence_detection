@@ -3,6 +3,7 @@ import threading
 from model import model, tower_loss, tower_accuracy
 from preprocess import read_clip
 
+
 def average_gradients(tower_grads):
     average_grads = []
     for grad_and_vars in zip(*tower_grads):
@@ -128,7 +129,7 @@ def load_and_enqueue(sess, model_settings, thread_index):
 
     read_index = thread_index
     while not coord.should_stop():
-        video_dir, start_index, label = dir_videos[read_index], label_clips[read_index]
+        video_dir, label = dir_videos[read_index], label_clips[read_index]
         video_dir = model_settings['data_home'] + video_dir
         input_clip = read_clip(video_dir, model_settings)
 

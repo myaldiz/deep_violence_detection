@@ -20,5 +20,5 @@ model_settings['input_shape'] = (model_settings['frames_per_clip'],
                                  model_settings['crop_size'],
                                  model_settings['channels'])
 
-mean_dir = model_settings['data_home'] + 'PreprocessData/' + 'crop_mean.npy'
+mean_dir = '../datasets/PreprocessData/' + 'crop_mean.npy'
 model_settings['np_mean'] = np.load(mean_dir).reshape(model_settings['input_shape'])

@@ -1,39 +1,30 @@
-import csv
+import random, time, ffmpeg
+import numpy as np
 
-def get_UCF101_dir(filename):
-    dir_images = []
-    start_clip = []
-    label_images = []
-    with open(filename, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-        for row in reader:
-            dir_images.append(row[0])
-            start_clip.append(int(row[1]))
-            label_images.append(row[2])
-    return dir_images, start_clip, label_images
+def get_data_dir(filename):
+    dir_videos, label_videos = [], []
+    with open(filename, 'r') as input_file:
+    for line in input_file:
+        file_name, label = line.split(' ')
+        dir_videos.append(file_name)
+        label_videos.append(int(label))
+    return dir_videos, label_videos
 
 
-def shuffle_list(dir_clips, start_clips, label_clips, seed=time.time()):
-    video_indices = list(range(len(dir_clips)))
+def shuffle_list(dir_videos, label_videos, seed=time.time()):
+    video_indices = list(range(len(dir_videos)))
+    random.seed(seed)
     random.shuffle(video_indices)
-    shuffled_clip_dirs   = [dir_clips[i] for i in video_indices]
-    shuffled_starts = [start_clips[i] for i in video_indices]
-    shuffled_labels = [label_clips[i] for i in video_indices]
-    return shuffled_clip_dirs, shuffled_starts, shuffled_labels
+    shuffled_video_dirs   = [dir_videos[i] for i in video_indices]
+    shuffled_labels = [label_videos[i] for i in video_indices]
+    return shuffled_video_dirs, shuffled_labels
 
 
-def get_frames_data(filename, start_index, num_frames_per_clip=16):
-    ret_arr = []
-    for parent, dirnames, filenames in os.walk(filename):
-        if(len(filenames) < num_frames_per_clip):
-            return np.array([])
-        filenames = sorted(filenames)
-        for i in range(start_index - 1, start_index + num_frames_per_clip - 1):
-            image_name = str(filename) + '/' + str(filenames[i])
-            img = Image.open(image_name)
-            img_data = np.array(img)
-            ret_arr.append(img_data)
-    return ret_arr
+def get_frames_data(file_path):
+    ff = ffmpeg.input(file_path).output('pipe:', format='rawvideo', pix_fmt='rgb24')
+    out, err = ff.run(capture_stdout=True)
+    video = np.frombuffer(out, np.uint8)
+    return video
 
 
 def read_clip(dirname, start_index, model_settings):

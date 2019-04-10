@@ -1,9 +1,4 @@
-import os
-import time
-import cv2
-import numpy as np
-import PIL.Image as Image
-import random
+
 import tensorflow as tf
 from datetime import datetime
 import threading 
@@ -67,7 +62,7 @@ def max_pool_3d(tensor_in, k, layer_name='max_pool'):
         return tensor_out
     
 
-def c3d_model(_X, model_settings):
+def model(_X, model_settings):
     wd = model_settings['weight_decay']
     #Convolution 1a
     conv1 = conv3d_layer(_X, 'wc1a', 'bc1a', [3, 3, 3, 3, 64], [64], None, 'Convolution_1a', False)
@@ -114,7 +109,7 @@ def c3d_model(_X, model_settings):
     return out
 
 
-def calc_tower_loss(loss_var_scope, logit, labels):
+def tower_loss(loss_var_scope, logit, labels):
     with tf.variable_scope(loss_var_scope):
         
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, 
@@ -133,93 +128,8 @@ def calc_tower_loss(loss_var_scope, logit, labels):
 
 #Updates:
 ##Add top-n correct predictions for ground up training
-def calc_tower_accuracy(logit, labels):
+def tower_accuracy(logit, labels):
     
     correct_predictions = tf.equal(labels, tf.argmax(logit, 1))
     total_correct = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
     return total_correct
-    
-
-def average_gradients(tower_grads):
-    
-    average_grads=[]
-    for grad_and_vars in zip(*tower_grads):
-        grads = []
-        for g, _ in grad_and_vars:
-            # Add 0 dimension to the gradients to represent the tower.
-            expanded_g = tf.expand_dims(g, 0)
-
-            # Append on a 'tower' dimension which we will average over below.
-            grads.append(expanded_g)
-
-            # Average over the 'tower' dimension.
-            grad = tf.concat(axis=0, values=grads)
-            grad = tf.reduce_mean(grad, 0)
-
-            # Keep in mind that the Variables are redundant because they are shared
-            # across towers. So .. we will just return the first tower's pointer to
-            # the Variable.
-            v = grad_and_vars[0][1]
-            grad_and_var = (grad, v)
-            average_grads.append(grad_and_var)
-    return average_grads
-
-
-def create_forward_graph(model_settings):
-    
-    queue = model_settings['queue']
-    tower_accuracy = []
-    tower_loss = []
-    with tf.variable_scope(tf.get_variable_scope()):
-        for gpu_index in range(model_settings['num_gpu']):
-            with tf.device('/gpu:%d' % gpu_index):
-                with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    ind_begin, ind_end= (gpu_index * model_settings['batch_size'],
-                                         (gpu_index+1) * model_settings['batch_size'])
-                    
-                    feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
-                    model_out = c3d_model(feed_input, model_settings)
-
-                    loss = calc_tower_loss(scope, model_out, feed_label)
-                    accuracy = calc_tower_accuracy(model_out, feed_label)
-                    tower_loss.append(loss)
-                    tower_accuracy.append(accuracy)
-
-                    tf.get_variable_scope().reuse_variables()
-                    
-    tower_mean_loss = tf.reduce_mean(tower_loss)
-    tower_mean_accuracy = tf.reduce_mean(tower_accuracy)
-    tf.summary.scalar('Total_Loss', tower_mean_loss)
-    tf.summary.scalar('Top1_Correct_Predictions', tower_mean_accuracy)
-    
-    model_settings['tower_mean_loss'] = tower_mean_loss
-    model_settings['tower_mean_accuracy'] = tower_mean_accuracy
-    model_settings['tower_loss'] = tower_loss
-                    
-def create_backward_graph(model_settings):
-    
-    global_step=tf.get_variable('Global_Step',[],
-                                initializer=tf.constant_initializer(0),
-                                trainable=False)
-    
-    opt, tower_loss = model_settings['optimizer'], model_settings['tower_loss']
-    
-    tower_grads=[]
-    with tf.variable_scope(tf.get_variable_scope()):
-        for gpu_index in range(model_settings['num_gpu']):
-            with tf.device('/gpu:%d' % gpu_index):
-                with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    loss = tower_loss[gpu_index]
-                    grads = opt.compute_gradients(loss)
-                    tower_grads.append(grads)
-    grads = average_gradients(tower_grads)
-    
-    apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
-    variable_averages = tf.train.ExponentialMovingAverage(model_settings['moving_decay'], global_step)
-    variable_averages_op = variable_averages.apply(tf.trainable_variables())
-    
-    train_op = tf.group(apply_gradient_op, variable_averages_op)
-
-    summary_op = tf.summary.merge_all()
-    
-    model_settings['train_op'], model_settings['summary_op'] = train_op, summary_op

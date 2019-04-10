@@ -1,6 +1,10 @@
 import random, time, ffmpeg
 import numpy as np
+import PIL.Image as Image
+import cv2
 
+# Reads train/test filenames from provided splits
+# Returns video directions and their labels in a list
 def get_data_dir(filename):
     dir_videos, label_videos = [], []
     with open(filename, 'r') as input_file:
@@ -11,6 +15,7 @@ def get_data_dir(filename):
     return dir_videos, label_videos
 
 
+# Shuffles video directions along with labels
 def shuffle_list(dir_videos, label_videos, seed=time.time()):
     video_indices = list(range(len(dir_videos)))
     random.seed(seed)
@@ -20,10 +25,14 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
     return shuffled_video_dirs, shuffled_labels
 
 
+# Given video directory it reads the video
+# extracts the frames, and do preprocessing operation
 def read_clip(dirname, model_settings):
     # Method to get frames from video
     def get_frames_data(file_path):
-        ff = ffmpeg.input(file_path).output('pipe:', format='rawvideo', pix_fmt='rgb24')
+        ff = ffmpeg.input(file_path).output('pipe:',
+                                            format='rawvideo',
+                                            pix_fmt='rgb24')
         out, err = ff.run(capture_stdout=True)
         video = np.frombuffer(out, np.uint8)
         return video
@@ -32,27 +41,30 @@ def read_clip(dirname, model_settings):
     crop_size = model_settings['crop_size']
     np_mean = model_settings['np_mean']
     tmp_data = get_frames_data(dirname)
-
-    if(len(tmp_data) == 0):
+    # TODO: Check and correct this and following part
+    if (len(tmp_data) == 0):
         return np.array([])
-    img_datas=[]
+    img_datas = []
     horizontal_flip = random.random()
     for j in range(len(tmp_data)):
         img = Image.fromarray(tmp_data[j].astype(np.uint8))
-        if(img.width>img.height):
-            scale = float(crop_size)/float(img.height)
-            img = np.array(cv2.resize(np.array(img),(int(img.width * scale + 1), crop_size))).astype(np.float32)
+        if (img.width > img.height):
+            scale = float(crop_size) / float(img.height)
+            img = np.array(cv2.resize(np.array(img),
+                                      (int(img.width * scale + 1),
+                                       crop_size))).astype(np.float32)
         else:
-            scale = float(crop_size)/float(img.width)
-            img = np.array(cv2.resize(np.array(img),(crop_size, int(img.height * scale + 1)))).astype(np.float32)
-        crop_x = int((img.shape[0] - crop_size)/2)
-        crop_y = int((img.shape[1] - crop_size)/2)
-        img = img[crop_x:crop_x+crop_size, crop_y:crop_y+crop_size,:] - np_mean[j]
-        
-        #Flip the image 0.5 chance
-        if(horizontal_flip > 0.5):
+            scale = float(crop_size) / float(img.width)
+            img = np.array(cv2.resize(np.array(img),
+                                      (crop_size,
+                                       int(img.height * scale + 1)))).astype(np.float32)
+        crop_x = int((img.shape[0] - crop_size) / 2)
+        crop_y = int((img.shape[1] - crop_size) / 2)
+        img = img[crop_x:crop_x + crop_size, crop_y:crop_y + crop_size, :] - np_mean[j]
+
+        # Flip the image 0.5 chance
+        if (horizontal_flip > 0.5):
             img = np.fliplr(img)
-            
+
         img_datas.append(img)
     return np.array(img_datas).astype(np.float32)
-    

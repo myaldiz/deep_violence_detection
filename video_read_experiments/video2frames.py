@@ -36,12 +36,12 @@ probe = ffmpeg.probe(input)
 video_info = probe["streams"][0]
 width = video_info["width"]
 height = video_info["height"]
-duration = video_info["duration"]
+duration = float(video_info["duration"])
 ff = ffmpeg.input(input).output('pipe:', format='rawvideo', pix_fmt='rgb24')
 out,err = ff.run(capture_stdout=True)
 video = np.frombuffer(out,np.uint8).reshape([-1,height,width,3])
 frames_in = video.shape[0]
-frames_out = int(float(duration)*fps_out)
+frames_out = int(duration*fps_out)
 index = np.linspace(0,frames_in-1, num=frames_out).astype(int)
 video = video[index,:,:,:]
 time1 = time.time()

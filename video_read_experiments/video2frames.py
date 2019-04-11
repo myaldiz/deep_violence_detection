@@ -8,7 +8,7 @@ import matplotlib.image as mpimg
 from ffmpy import FFmpeg
 import ffmpeg
 
-fps = 25
+fps_out = 25
 input = pwd+'video.avi'				# Enter filename here
 out_dir = pwd+'video_frames'
 str = '%s/%%05d.png'%out_dir
@@ -21,7 +21,7 @@ except(FileExistsError):
 
 ff = FFmpeg(
 	inputs={input: None},
-	outputs={str: ['-r','%d'%fps,'-f','image2']}
+	outputs={str: ['-r','%d'%fps_out,'-f','image2']}
 )
 ff.run()
 files = os.listdir(out_dir)
@@ -32,9 +32,18 @@ time1 = time.time()
 read_time = time1-time0	
 
 time0 = time.time()
+probe = ffmpeg.probe(input)
+video_info = probe["streams"][0]
+width = video_info["width"]
+height = video_info["height"]
+duration = video_info["duration"]
 ff = ffmpeg.input(input).output('pipe:', format='rawvideo', pix_fmt='rgb24')
 out,err = ff.run(capture_stdout=True)
-video = np.frombuffer(out,np.uint8)
+video = np.frombuffer(out,np.uint8).reshape([-1,height,width,3])
+frames_in = video.shape[0]
+frames_out = int(float(duration)*fps_out)
+index = np.linspace(0,frames_in-1, num=frames_out).astype(int)
+video = video[index,:,:,:]
 time1 = time.time()
 conv_time = time1-time0	
 

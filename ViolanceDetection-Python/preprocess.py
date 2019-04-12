@@ -27,27 +27,34 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
 # Given video directory it reads the video
 # extracts the frames, and do preprocessing operation
 def read_clip(dirname, model_settings):
-    # Method to get frames from video
-
-    num_frames_per_clip = model_settings['frames_per_clip']
+    frames_per_batch = model_settings['frames_per_batch']
+    video_fps = model_settings['video_fps']
     crop_size = model_settings['crop_size']
     np_mean = model_settings['np_mean']
-    fps = model_settings['frames_per_clip']
     horizontal_flip = random.random()
 
     probe = ffmpeg.probe(dirname)
     video_info = probe["streams"][0]
-    video_width = int(video_info["width"])
-    video_height = int(video_info["height"])
+    video_width = video_info["width"]
+    video_height = video_info["height"]
+    video_duration = float(video_info["duration"])
+    num_frame = int(video_info["nb_frames"])
+
+    rand_max = int(num_frame - ((num_frame / video_duration) * (frames_per_batch / video_fps)))
+    start_frame = random.randint(0, rand_max - 1)
+    #end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
+    video_start = (video_duration / num_frame) * start_frame
+    video_end = video_start + ((frames_per_batch+1) / video_fps)
 
     x_pos = max(video_width - video_height, 0) // 2
     y_pos = max(video_height - video_width, 0) // 2
     crop_size1 = min(video_height, video_width)
-
-    # Input video
-    ff = ffmpeg.input(dirname)
+    # Read specified times of the video
+    ff = ffmpeg.input(dirname, ss=video_start, t=video_end-video_start)
+    # Trim video -> did not work :(
+    # ff = ff.trim(end_frame='50')
     # Divide into frames
-    ff = ffmpeg.filter(ff, 'fps', fps)
+    ff = ffmpeg.filter(ff, 'fps', video_fps)
     # Crop
     ff = ffmpeg.crop(ff, x_pos, y_pos, crop_size1, crop_size1)
     # Subsample
@@ -55,25 +62,25 @@ def read_clip(dirname, model_settings):
     # Horizontal flip with some probability
     if horizontal_flip > 0.5:
         ff = ffmpeg.hflip(ff)
-
+    # Output the video
     ff = ffmpeg.output(ff, 'pipe:',
                        format='rawvideo',
                        pix_fmt='rgb24')
+    # Run Process in quiet mode
     out, _ = ffmpeg.run(ff, capture_stdout=True, quiet=True)
+    # Extract to numpy array
     video = np.frombuffer(out, np.uint8). \
         reshape([-1, crop_size, crop_size, 3])
 
-    start_index = random.randint(0, video.shape[0] - fps)
-    video = video[start_index:start_index + fps]
-    # Substracts the mean and converts type to float32
-    video = video - np_mean
+    # Subtracts the mean and converts type to float32
+    video = video[:16] - np_mean
     return video
 
 
 # TODO: Check reading with thread and time it consumes
-#time0 = time.time()
-#for read_index in range(10):
+# time0 = time.time()
+# for read_index in range(10):
 #    video_dir, label = dir_videos[read_index], label_clips[read_index]
 #    video_dir = model_settings['data_home'] + video_dir
 #    video = read_clip(video_dir, model_settings)
-#print('Time diff:', time.time() - time0)
+# print('Time diff:', time.time() - time0)

@@ -1,7 +1,7 @@
 import numpy as np
 
-model_settings = {'max_steps': 10000, 'batch_size': 25, 'frames_per_clip': 16,
-                  'crop_size': 112, 'num_gpu': 1, 'channels': 3,
+model_settings = {'max_steps': 10000, 'batch_size': 25, 'frames_per_batch': 16,
+                  'video_fps': 12, 'crop_size': 112, 'num_gpu': 1, 'channels': 3,
                   'checkpoint_dir': './checkpoints',
                   # 'model_read_dir' : './models/s1m_mod.model',
                   # 'model_save_dir' : './models/C3D_1.model',
@@ -15,7 +15,7 @@ model_settings = {'max_steps': 10000, 'batch_size': 25, 'frames_per_clip': 16,
                   'read_pretrained_model': True}
 
 model_settings['total_batch'] = model_settings['batch_size'] * model_settings['num_gpu']
-model_settings['input_shape'] = (model_settings['frames_per_clip'],
+model_settings['input_shape'] = (model_settings['frames_per_batch'],
                                  model_settings['crop_size'],
                                  model_settings['crop_size'],
                                  model_settings['channels'])

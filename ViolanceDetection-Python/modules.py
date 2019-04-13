@@ -30,34 +30,30 @@ def average_gradients(tower_grads):
 
 def create_graph(model_settings):
     queue = model_settings['queue']
-    tower_accuracy = []
-    tower_loss = []
+    tower_accuracies = []
+    tower_losses = []
     with tf.variable_scope(tf.get_variable_scope()):
         for gpu_index in range(model_settings['num_gpu']):
             with tf.device('/gpu:%d' % gpu_index):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    ind_begin, ind_end = (gpu_index * model_settings['batch_size'],
-                                          (gpu_index + 1) * model_settings['batch_size'])
-
                     feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
                     model_out = model(feed_input, model_settings)
 
-                    # TODO: Pass loss through model settings
                     loss = tower_loss(scope, model_out, feed_label)
                     accuracy = tower_accuracy(model_out, feed_label)
-                    tower_loss.append(loss)
-                    tower_accuracy.append(accuracy)
+                    tower_losses.append(loss)
+                    tower_accuracies.append(accuracy)
 
                     tf.get_variable_scope().reuse_variables()
 
-    tower_mean_loss = tf.reduce_mean(tower_loss)
+    tower_mean_loss = tf.reduce_mean(tower_losses)
     tower_mean_accuracy = tf.reduce_mean(tower_accuracy)
     tf.summary.scalar('Total_Loss', tower_mean_loss)
     tf.summary.scalar('Top1_Correct_Predictions', tower_mean_accuracy)
 
     model_settings['tower_mean_loss'] = tower_mean_loss
     model_settings['tower_mean_accuracy'] = tower_mean_accuracy
-    model_settings['tower_loss'] = tower_loss
+    model_settings['tower_losses'] = tower_losses
 
 
 def create_training_op(model_settings):
@@ -65,14 +61,14 @@ def create_training_op(model_settings):
                                   initializer=tf.constant_initializer(0),
                                   trainable=False)
 
-    opt, tower_loss = model_settings['optimizer'], model_settings['tower_loss']
+    opt, tower_losses = model_settings['optimizer'], model_settings['tower_losses']
 
     tower_grads = []
     with tf.variable_scope(tf.get_variable_scope()):
         for gpu_index in range(model_settings['num_gpu']):
             with tf.device('/gpu:%d' % gpu_index):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    loss = tower_loss[gpu_index]
+                    loss = tower_losses[gpu_index]
                     grads = opt.compute_gradients(loss)
                     tower_grads.append(grads)
     grads = average_gradients(tower_grads)
@@ -89,7 +85,6 @@ def create_training_op(model_settings):
 
 
 def set_placeholders(model_settings):
-    total_batch = model_settings['total_batch']
     images_placeholder = tf.placeholder(tf.float32, shape=model_settings['input_shape'], name="input_clip")
     labels_placeholder = tf.placeholder(tf.int64, shape=(), name="labels")
     dropout_placeholder = tf.placeholder_with_default(model_settings['dropout'], shape=())
@@ -111,8 +106,8 @@ def set_queue(model_settings):
                                  labels_placeholder.shape],
                          name='Input_Queue')
 
-    enqueue_op = queue.enqueue([model_settings['images_placeholder'],
-                                model_settings['labels_placeholder']],
+    enqueue_op = queue.enqueue([[images_placeholder],
+                                labels_placeholder],
                                name='Enqueue_Operation')
 
     model_settings['queue'], model_settings['enqueue_op'] = queue, enqueue_op
@@ -134,7 +129,7 @@ def load_and_enqueue(sess, model_settings, thread_index):
         input_clip = read_clip(video_dir, model_settings)
 
         # if input clip is not empty
-        if (input_clip.shape == model_settings['input_shape']):
+        if input_clip.shape == model_settings['input_shape']:
             sess.run(enqueue_op, feed_dict={images_placeholder: input_clip,
                                             labels_placeholder: label})
         read_index = (read_index + num_thread) % data_size
@@ -154,7 +149,7 @@ def stop_threads(sess, threads, model_settings):
     model_settings['coord'].request_stop()
     queue = model_settings['queue']
     for i in range(model_settings['num_thread']):
-        if (sess.run(queue.size()) < model_settings['total_batch']):
+        if sess.run(queue.size()) < model_settings['total_batch']:
             break
         sess.run(queue.dequeue_many(model_settings['batch_size']))
     model_settings['coord'].join(threads)

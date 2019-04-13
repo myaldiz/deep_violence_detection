@@ -1,8 +1,10 @@
 from model import *
 from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
+from modules import stop_threads
 from preprocess import *
 from default_settings import model_settings
+from datetime import datetime
 
 
 def show_running_info(model_settings, duration, step, loss, accuracy):
@@ -17,7 +19,7 @@ def show_running_info(model_settings, duration, step, loss, accuracy):
     print(format_str % format_tuple)
 
 
-def run_training(sess, model_settings):
+def run_training(model_settings, sess):
     model_settings['optimizer'] = tf.train.AdamOptimizer(model_settings['learning_rate'])
 
     # Set placeholders, queue operations and thread coordinator
@@ -27,10 +29,6 @@ def run_training(sess, model_settings):
     # Create Graph
     create_graph(model_settings)
     create_training_op(model_settings)
-
-    if (model_settings['fc_pretrained'] == True):
-        for fc_variable in tf.get_collection('fc_layer'):
-            tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, fc_variable)
 
     # Read training file locations and shuffle
     train_dir_locations = model_settings['train_test_loc'] + \
@@ -51,7 +49,7 @@ def run_training(sess, model_settings):
     sess.run(tf.local_variables_initializer())
 
     # Restore saved model variables
-    if (model_settings['read_pretrained_model'] == True):
+    if model_settings['read_pretrained_model']:
         saver.restore(sess, model_settings['model_read_dir'])
 
     # Tensorboard summary writers
@@ -60,11 +58,7 @@ def run_training(sess, model_settings):
     model_settings['summary_writer'] = summary_writer
 
     train_op, summary_op = model_settings['train_op'], model_settings['summary_op']
-
-    # Single tower loss implementation for now
     loss_op, acc_op = model_settings['tower_mean_loss'], model_settings['tower_mean_accuracy']
-
-    # time.sleep(15)
 
     print('Training begins:')
     for step in range(model_settings['max_steps']):
@@ -74,20 +68,26 @@ def run_training(sess, model_settings):
         if (step + 1) % model_settings['checkpoints'] != 0:
             _, tower_mean_loss, tower_mean_acc = sess.run([train_op, loss_op, acc_op])
         else:
-            _, summary_str, tower_mean_loss, tower_mean_acc = sess.run([train_op, summary_op, loss_op, acc_op])
+            _, summary_str, tower_mean_loss, tower_mean_acc = \
+                sess.run([train_op, summary_op, loss_op, acc_op])
             summary_writer.add_summary(summary_str, step)
 
         show_running_info(model_settings, time.time() - start_time,
                           step, tower_mean_loss, tower_mean_acc)
     stop_threads(sess, read_threads, model_settings)
+    save_graph()
 
 
-def save_graph(sess, model_settings):
-    model_settings['saver'].save(sess,
-                                 model_settings['model_save_dir'],
-                                 write_meta_graph=False)
+def save_graph(model_settings, sess):
+    saver = tf.train.Saver(tf.get_collection('all_variables'))
+    save_dir = model_settings['model_save_dir']
+    saver.save(sess, save_dir, write_meta_graph=False)
+
+
+def main():
+    with tf.Session() as sess:
+        run_training(model_settings, sess)
 
 
 if __name__ == '__main__':
-    # run_training()
-    pass
+    main()

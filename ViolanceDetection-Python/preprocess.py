@@ -25,7 +25,7 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
 
 
 # Given video directory it reads the video
-# extracts the frames, and do preprocessing operation
+# extracts the frames, and do pre-processing operation
 def read_clip(dirname, model_settings):
     frames_per_batch = model_settings['frames_per_batch']
     video_fps = model_settings['video_fps']
@@ -42,15 +42,15 @@ def read_clip(dirname, model_settings):
 
     rand_max = int(num_frame - ((num_frame / video_duration) * (frames_per_batch / video_fps)))
     start_frame = random.randint(0, rand_max - 1)
-    #end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
+    # end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
     video_start = (video_duration / num_frame) * start_frame
-    video_end = video_start + ((frames_per_batch+1) / video_fps)
+    video_end = video_start + ((frames_per_batch + 1) / video_fps)
 
     x_pos = max(video_width - video_height, 0) // 2
     y_pos = max(video_height - video_width, 0) // 2
     crop_size1 = min(video_height, video_width)
     # Read specified times of the video
-    ff = ffmpeg.input(dirname, ss=video_start, t=video_end-video_start)
+    ff = ffmpeg.input(dirname, ss=video_start, t=video_end - video_start)
     # Trim video -> did not work :(
     # ff = ff.trim(end_frame='50')
     # Divide into frames
@@ -75,12 +75,3 @@ def read_clip(dirname, model_settings):
     # Subtracts the mean and converts type to float32
     video = video[:16] - np_mean
     return video
-
-
-# TODO: Check reading with thread and time it consumes
-# time0 = time.time()
-# for read_index in range(10):
-#    video_dir, label = dir_videos[read_index], label_clips[read_index]
-#    video_dir = model_settings['data_home'] + video_dir
-#    video = read_clip(video_dir, model_settings)
-# print('Time diff:', time.time() - time0)

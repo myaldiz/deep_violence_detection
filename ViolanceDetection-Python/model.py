@@ -121,8 +121,9 @@ def model(_X, model_settings):
     with tf.variable_scope('Softmax_Linear'):
         w_out = _variable_with_weight_decay(model_settings, 'wout', [4096, 101], train_fc)
         b_out = _variable(model_settings, 'bout', [101], tf.constant_initializer(0.0), train_fc)
-        # tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, w_out)
-        # tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, b_out)
+        if model_settings['load_fc_layers']:
+            tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, w_out)
+            tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, b_out)
         out = tf.matmul(dense2, w_out) + b_out
 
     return out

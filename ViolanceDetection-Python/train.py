@@ -51,6 +51,11 @@ def run_training(model_settings, sess):
     # Restore saved model variables
     if model_settings['read_pretrained_model']:
         saver.restore(sess, model_settings['model_read_dir'])
+        print('Read the models successfully..')
+
+    # check last variable restored
+    # var = sess.run(tf.model_variables()[-1])
+    # print(tf.model_variables()[-1], var[:10])
 
     # Tensorboard summary writers
     summary_writer = tf.summary.FileWriter(model_settings['checkpoint_dir'])

@@ -34,7 +34,13 @@ def create_graph(model_settings):
     tower_losses = []
     with tf.variable_scope(tf.get_variable_scope()):
         for gpu_index in range(model_settings['num_gpu']):
-            with tf.device('/gpu:%d' % gpu_index):
+            # if run on cpu specified
+            if model_settings['run_on_cpu']:
+                running_device = '/cpu:0'
+            else:
+                # otherwise run on GPU
+                running_device = '/gpu:%d' % gpu_index
+            with tf.device(running_device):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
                     feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
                     model_out = model(feed_input, model_settings)
@@ -47,7 +53,7 @@ def create_graph(model_settings):
                     tf.get_variable_scope().reuse_variables()
 
     tower_mean_loss = tf.reduce_mean(tower_losses)
-    tower_mean_accuracy = tf.reduce_mean(tower_accuracy)
+    tower_mean_accuracy = tf.reduce_mean(tower_accuracies)
     tf.summary.scalar('Total_Loss', tower_mean_loss)
     tf.summary.scalar('Top1_Correct_Predictions', tower_mean_accuracy)
 
@@ -66,7 +72,13 @@ def create_training_op(model_settings):
     tower_grads = []
     with tf.variable_scope(tf.get_variable_scope()):
         for gpu_index in range(model_settings['num_gpu']):
-            with tf.device('/gpu:%d' % gpu_index):
+            # if run on cpu specified
+            if model_settings['run_on_cpu']:
+                running_device = '/cpu:0'
+            else:
+                # otherwise run on GPU
+                running_device = '/gpu:%d' % gpu_index
+            with tf.device(running_device):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
                     loss = tower_losses[gpu_index]
                     grads = opt.compute_gradients(loss)
@@ -106,7 +118,7 @@ def set_queue(model_settings):
                                  labels_placeholder.shape],
                          name='Input_Queue')
 
-    enqueue_op = queue.enqueue([[images_placeholder],
+    enqueue_op = queue.enqueue([images_placeholder,
                                 labels_placeholder],
                                name='Enqueue_Operation')
 

@@ -27,9 +27,9 @@ model_settings = {
 
     # Directory settings
     'checkpoint_dir': './checkpoints',
-    #'model_read_dir' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
-    'model_read_dir' : './models/UCF_finetuneFC_last.model',
-    #'model_save_dir' : './models/C3D_1.model',
+    # 'model_read_dir' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
+    'model_read_dir': './models/UCF_finetuneFC_last.model',
+    # 'model_save_dir' : './models/C3D_1.model',
     'data_home': '../datasets/UCF-101/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
     'train_file_name': '/trainlist01.txt',

@@ -10,7 +10,7 @@ def get_data_dir(filename):
         for line in input_file:
             file_name, label = line.split(' ')
             dir_videos.append(file_name)
-            label_videos.append(int(label)-1)
+            label_videos.append(int(label) - 1)
     return dir_videos, label_videos
 
 

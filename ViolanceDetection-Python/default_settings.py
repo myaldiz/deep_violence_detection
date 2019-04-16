@@ -22,8 +22,8 @@ model_settings = {
     'run_on_cpu': True,  # Training device
     'num_gpu': 1,  # Number of GPU's in the system
     'variable_storage': '/cpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
-    'num_thread': 2,  # Number of threads to read video files
-    'queue_size': 31,  # Queue size for reading input
+    'num_thread': 1,  # Number of threads to read video files
+    'queue_size': 50,  # Queue size for reading input
 
     # Directory settings
     'checkpoint_dir': './checkpoints',

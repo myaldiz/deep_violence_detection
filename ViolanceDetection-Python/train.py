@@ -26,19 +26,18 @@ def run_training(model_settings, sess):
     set_placeholders(model_settings)
     set_queue(model_settings)
 
-    # Create Graph
-    create_graph(model_settings)
-    create_training_op(model_settings)
-
-    # Read training file locations and shuffle
+    # Read training file locations
     train_dir_locations = model_settings['train_test_loc'] + \
                           model_settings['train_file_name']
-    dir_clips, label_clips = get_data_dir(train_dir_locations)
-    model_settings['train_list'] = shuffle_list(dir_clips, label_clips)
+    model_settings['train_list'] = get_data_dir(train_dir_locations)
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()
-    read_threads = start_queue_threads(sess, model_settings)
+    start_queue_threads(sess, model_settings)
+
+    # Create Graph
+    create_graph(model_settings)
+    create_training_op(model_settings)
 
     # Save Only Model Variables
     saver = tf.train.Saver(tf.model_variables())
@@ -79,7 +78,9 @@ def run_training(model_settings, sess):
 
         show_running_info(model_settings, time.time() - start_time,
                           step, tower_mean_loss, tower_mean_acc)
-    stop_threads(sess, read_threads, model_settings)
+
+    # Stop the input queue threads
+    model_settings['coord'].request_stop()
     save_graph()
 
 

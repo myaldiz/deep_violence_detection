@@ -1,7 +1,7 @@
 import tensorflow as tf
 import threading
 from model import model, tower_loss, tower_accuracy
-from preprocess import read_clip
+from preprocess import read_clip, shuffle_list
 
 
 def average_gradients(tower_grads):
@@ -135,34 +135,48 @@ def load_and_enqueue(sess, model_settings, thread_index):
     data_size = len(dir_videos)
 
     read_index = thread_index
-    while not coord.should_stop():
+    for read_index in range(thread_index, data_size, num_thread):
+        if coord.should_stop():
+            break
         video_dir, label = dir_videos[read_index], label_clips[read_index]
         video_dir = model_settings['data_home'] + video_dir
+
+        print(video_dir)
         input_clip = read_clip(video_dir, model_settings)
 
         # if input clip is not empty
         if input_clip.shape == model_settings['input_shape']:
             sess.run(enqueue_op, feed_dict={images_placeholder: input_clip,
                                             labels_placeholder: label})
-        read_index = (read_index + num_thread) % data_size
     # print('Stop_requested: %d' % thread_index)
 
 
-def start_queue_threads(sess, model_settings):
+# TODO: Check correctness of thread code
+def queue_thread_runner(sess, model_settings):
     t = []
-    for i in range(model_settings['num_thread']):
-        t.append(threading.Thread(target=load_and_enqueue, args=(sess, model_settings, i)))
-        t[i].start()
-    return t
-
-
-def stop_threads(sess, threads, model_settings):
     coord = model_settings['coord']
-    model_settings['coord'].request_stop()
     queue = model_settings['queue']
+
+    for i in range(model_settings['num_thread']):
+        t.append(threading.Thread(target=load_and_enqueue,
+                                  args=(sess, model_settings, i)))
+
+    while not coord.should_stop():
+        coord.join(t)
+        # Shuffle the list
+        model_settings['train_list'] = shuffle_list(*model_settings['train_list'])
+        for i in range(model_settings['num_thread']):
+            t[i].start()
+
     for i in range(model_settings['num_thread']):
         if sess.run(queue.size()) < model_settings['total_batch']:
             break
         sess.run(queue.dequeue_many(model_settings['batch_size']))
-    model_settings['coord'].join(threads)
-    print('Finished')
+    coord.join(t)
+    print('Threads stopped!')
+
+
+def start_queue_threads(sess, model_settings):
+    runner_thread = threading.Thread(target=queue_thread_runner,
+                                     args=(sess, model_settings))
+    runner_thread.run()

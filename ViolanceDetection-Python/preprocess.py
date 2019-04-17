@@ -28,12 +28,18 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
 # Given video directory it reads the video
 # extracts the frames, and do pre-processing operation
 def read_clip(dirname, model_settings):
+    # Input size for the network
     frames_per_batch = model_settings['frames_per_batch']
     video_fps = model_settings['video_fps']
     crop_size = model_settings['crop_size']
     np_mean = model_settings['np_mean']
-    horizontal_flip = random.random()
+    trans_max = model_settings['trans_max']
 
+    # Data augmentation randoms
+    horizontal_flip = random.random()
+    trans_factor = random.randint(-trans_max, trans_max)
+
+    # Video information
     probe = ffmpeg.probe(dirname)
     video_info = probe["streams"][0]
     video_width = video_info["width"]
@@ -41,14 +47,16 @@ def read_clip(dirname, model_settings):
     video_duration = float(video_info["duration"])
     num_frame = int(video_info["nb_frames"])
 
+    # Select which portion of the video will be input
     rand_max = int(num_frame - ((num_frame / video_duration) * (frames_per_batch / video_fps)))
     start_frame = random.randint(0, rand_max - 1)
     # end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
     video_start = (video_duration / num_frame) * start_frame
     video_end = video_start + ((frames_per_batch + 1) / video_fps)
 
-    x_pos = max(video_width - video_height, 0) // 2
-    y_pos = max(video_height - video_width, 0) // 2
+    # Cropping factor
+    x_pos = max(video_width - video_height + 2 * trans_factor, 0) // 2
+    y_pos = max(video_height - video_width + 2 * trans_factor, 0) // 2
     crop_size1 = min(video_height, video_width)
     # Read specified times of the video
     ff = ffmpeg.input(dirname, ss=video_start, t=video_end - video_start)

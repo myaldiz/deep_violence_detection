@@ -2,11 +2,11 @@ import numpy as np
 
 model_settings = {
     # Training settings
-    'max_steps': 5,
+    'max_steps': 10,
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
     'learning_rate': 1e-4,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
-    'batch_size': 6,  # Batch per GPU
+    'batch_size': 10,  # Batch per GPU
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
@@ -18,23 +18,24 @@ model_settings = {
     'video_fps': 12,  # FPS of frames extracted
     'crop_size': 112,  # Input frames dimension
     'channels': 3,
+    'trans_max': 10,  # Translation factor for pre-processing
 
     # System settings
     'run_on_cpu': True,  # Training device
     'num_gpu': 1,  # Number of GPU's in the system
     'variable_storage': '/cpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
-    'num_thread': 4,  # Number of threads to read video files
+    'num_thread': 2,  # Number of threads to read video files
     'queue_size': 20,  # Queue size for reading input
 
     # Directory settings
     'checkpoint_dir': './checkpoints',
-    'model_read_dir' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
-    # 'model_read_dir': './models/UCF_finetuneFC_last.model',
+    # 'model_read_dir' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
+    'model_read_dir': './models/UCF_finetuneFC_last.model',
     # 'model_save_dir' : './models/C3D_1.model',
     'data_home': '../datasets/UCF-101/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
-    # 'train_file_name': '/trainlist01.txt',
-    'train_file_name': '/train_small.txt',
+    'train_file_name': '/trainlist01.txt',
+    # 'train_file_name': '/train_small.txt',
     'test_file_name': '/testlist01.txt',
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy'
 }

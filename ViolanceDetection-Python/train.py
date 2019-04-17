@@ -1,7 +1,7 @@
-from model import *
+import tensorflow as tf
 from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
-from modules import stop_threads
+from modules import stop_thread_runner
 from preprocess import *
 from default_settings import model_settings
 from datetime import datetime
@@ -67,6 +67,7 @@ def run_training(model_settings, sess):
     print('Training begins:')
     for step in range(model_settings['max_steps']):
         start_time = time.time()
+        # Number of data enqueued
         # print(sess.run(model_settings['queue'].size()))
 
         if (step + 1) % model_settings['checkpoints'] != 0:
@@ -80,8 +81,11 @@ def run_training(model_settings, sess):
                           step, tower_mean_loss, tower_mean_acc)
 
     # Stop the input queue threads
-    model_settings['coord'].request_stop()
-    save_graph()
+    stop_thread_runner(sess, model_settings)
+
+    # Save the graph
+    if model_settings['save_graph']:
+        save_graph(model_settings, sess)
 
 
 def save_graph(model_settings, sess):

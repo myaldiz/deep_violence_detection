@@ -16,6 +16,7 @@ def get_data_dir(filename):
 
 # Shuffles video directions along with labels
 def shuffle_list(dir_videos, label_videos, seed=time.time()):
+    print('Shuffling the dataset...')
     video_indices = list(range(len(dir_videos)))
     random.seed(seed)
     random.shuffle(video_indices)

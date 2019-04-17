@@ -29,7 +29,7 @@ def run_training(model_settings, sess):
     # Read training file locations
     train_dir_locations = model_settings['train_test_loc'] + \
                           model_settings['train_file_name']
-    model_settings['train_list'] = get_data_dir(train_dir_locations)
+    model_settings['input_list'] = get_data_dir(train_dir_locations)
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()

@@ -42,7 +42,12 @@ def create_graph(model_settings):
                 running_device = '/gpu:%d' % gpu_index
             with tf.device(running_device):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
+                    if model_settings['input_from_placeholders']:
+                        feed_input = model_settings['images_placeholder']
+                        feed_label = model_settings['labels_placeholder']
+                    else:
+                        feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
+
                     model_out = model(feed_input, model_settings)
 
                     loss = tower_loss(scope, model_out, feed_label)
@@ -128,7 +133,7 @@ def set_queue(model_settings):
 # Read single clip at a time
 def load_and_enqueue(sess, model_settings, thread_index):
     coord, enqueue_op = model_settings['coord'], model_settings['enqueue_op']
-    dir_videos, label_clips = model_settings['train_list']
+    dir_videos, label_clips = model_settings['input_list']
     num_thread = model_settings['num_thread']
     images_placeholder = model_settings['images_placeholder']
     labels_placeholder = model_settings['labels_placeholder']

@@ -12,6 +12,7 @@ model_settings = {
     'train_conv': False,
     'train_fc': True,
     'save_graph': False,
+    'input_from_placeholders': False,
 
     # Neural-Network settings
     'frames_per_batch': 16,  # Number of frames in a batch

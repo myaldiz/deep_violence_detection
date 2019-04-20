@@ -43,10 +43,16 @@ def create_graph(model_settings):
             with tf.device(running_device):
                 with tf.name_scope('Tower_%d' % gpu_index) as scope:
                     if model_settings['input_from_placeholders']:
-                        feed_input = model_settings['images_placeholder']
-                        feed_label = model_settings['labels_placeholder']
+                        feed_input = [model_settings['images_placeholder']]
+                        feed_label = [model_settings['labels_placeholder']]
                     else:
-                        feed_input, feed_label = queue.dequeue_many(model_settings['batch_size'])
+                        if model_settings['dequeue_immediately']:
+                            read_batch_size = tf.math.minimum(queue.size(), model_settings['batch_size'])
+                        else:
+                            read_batch_size = tf.convert_to_tensor(model_settings['batch_size'])
+
+                        model_settings['read_batch_size'] = read_batch_size
+                        feed_input, feed_label = queue.dequeue_many(read_batch_size)
 
                     model_out = model(feed_input, model_settings)
 
@@ -156,14 +162,14 @@ def load_and_enqueue(sess, model_settings, thread_index):
                                             labels_placeholder: label})
 
 
-# TODO: Check correctness of the thread code
 def queue_thread_runner(sess, model_settings):
     coord = model_settings['coord']
     queue = model_settings['queue']
 
     while not coord.should_stop():
         # Shuffle the list
-        model_settings['train_list'] = shuffle_list(*model_settings['train_list'])
+        if not model_settings['is_testing']:
+            model_settings['input_list'] = shuffle_list(*model_settings['input_list'])
 
         # Create threads to enqueue and start them
         t = []
@@ -174,6 +180,10 @@ def queue_thread_runner(sess, model_settings):
 
         # Wait threads to finish
         coord.join(t)
+        model_settings['current_epoch'] += 1
+        # if in testing mode
+        if model_settings['is_testing']:
+            break
 
     print('Threads stopped!')
 

@@ -3,18 +3,19 @@ from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
 from modules import stop_thread_runner
 from preprocess import *
-from default_settings import model_settings
+from default_settings import model_settings, set_model_settings
 from datetime import datetime
 
 
 def show_running_info(model_settings, duration, step, loss, accuracy):
     batch_size, num_gpu = model_settings['batch_size'], model_settings['num_gpu']
     num_examples_per_step = model_settings['total_batch']
+    epoch = model_settings['current_epoch']
     examples_per_sec = num_examples_per_step / duration
     sec_per_batch = duration / num_gpu
-    format_str = ('%s: step %d, (%.1f examples/sec; %.3f'
+    format_str = ('Epoch: %d, %s: step %d, (%.1f examples/sec; %.3f'
                   'sec/batch), (accuracy: %f loss: %f)')
-    format_tuple = (datetime.now(), step,
+    format_tuple = (epoch, datetime.now(), step,
                     examples_per_sec, sec_per_batch, accuracy, loss)
     print(format_str % format_tuple)
 
@@ -22,6 +23,7 @@ def show_running_info(model_settings, duration, step, loss, accuracy):
 def run_training(model_settings, sess):
     model_settings['optimizer'] = tf.train.AdamOptimizer(model_settings['learning_rate'])
 
+    set_model_settings(model_settings)
     # Set placeholders, queue operations and thread coordinator
     set_placeholders(model_settings)
     set_queue(model_settings)

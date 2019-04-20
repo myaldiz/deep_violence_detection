@@ -107,7 +107,7 @@ def model(_X, model_settings):
 
     # Reshape weights for fc6
     pool5 = tf.transpose(pool5, perm=[0, 1, 4, 2, 3])
-    dense1 = tf.reshape(pool5, [model_settings['batch_size'], 8192])
+    dense1 = tf.reshape(pool5, [-1, 8192])
 
     # FC6 and FC7
     dense1 = fc_layer(model_settings, dense1, 'wd1', 'bd1', [8192, 4096],

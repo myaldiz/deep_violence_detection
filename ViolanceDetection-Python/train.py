@@ -1,3 +1,4 @@
+import sys, os
 import tensorflow as tf
 from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
@@ -18,6 +19,43 @@ def show_running_info(model_settings, duration, step, loss, accuracy):
     format_tuple = (epoch, datetime.now(), step,
                     examples_per_sec, sec_per_batch, accuracy, loss)
     print(format_str % format_tuple)
+
+
+def make_dirs(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def time2string(t):
+    out_str = str(t).split(' ')
+    interm = '-'.join(out_str[1].split(':')).split('.')
+    out_str[1] = interm[0]
+    # out_str.append(interm[1])
+    return '__'.join(out_str)
+
+
+def save_graph(model_settings, sess):
+    folder_name = time2string(model_settings['start_time']) + '/'
+    save_dir = model_settings['model_save_dir']
+    save_dir += model_settings['model_name'] + '/' + folder_name
+    make_dirs(save_dir)
+    file_name = time2string(datetime.now())
+    save_dir += file_name
+    try:
+        saver = tf.train.Saver(tf.get_collection('all_variables'))
+        saver.save(sess, save_dir, write_meta_graph=False)
+        print('Variables saved successfully..')
+    except:
+        print('Error occurred while saving the model: ', sys.exc_info()[0])
+
+
+def set_summary_writers(model_settings, sess):
+    summary_dir = model_settings['checkpoint_dir'] + model_settings['model_name']
+    summary_dir += '/' + time2string(model_settings['start_time']) + '/'
+    make_dirs(summary_dir)
+    summary_writer = tf.summary.FileWriter(summary_dir)
+    summary_writer.add_graph(sess.graph)
+    return summary_writer
 
 
 def run_training(model_settings, sess):
@@ -51,17 +89,15 @@ def run_training(model_settings, sess):
 
     # Restore saved model variables
     if model_settings['read_pretrained_model']:
-        saver.restore(sess, model_settings['model_read_dir'])
+        saver.restore(sess, model_settings['model_read_loc'])
         print('Read the models successfully..')
 
     # check last variable restored
     # var = sess.run(tf.model_variables()[-1])
     # print(tf.model_variables()[-1], var[:10])
 
-    # Tensorboard summary writers
-    summary_writer = tf.summary.FileWriter(model_settings['checkpoint_dir'])
-    summary_writer.add_graph(sess.graph)
-    model_settings['summary_writer'] = summary_writer
+    # Set Tensorboard summary writers
+    summary_writer = set_summary_writers(model_settings, sess)
 
     train_op, summary_op = model_settings['train_op'], model_settings['summary_op']
     loss_op, acc_op = model_settings['tower_mean_loss'], model_settings['tower_mean_accuracy']
@@ -90,15 +126,16 @@ def run_training(model_settings, sess):
         save_graph(model_settings, sess)
 
 
-def save_graph(model_settings, sess):
-    saver = tf.train.Saver(tf.get_collection('all_variables'))
-    save_dir = model_settings['model_save_dir']
-    saver.save(sess, save_dir, write_meta_graph=False)
-
-
 def main():
     with tf.Session() as sess:
-        run_training(model_settings, sess)
+        try:
+            run_training(model_settings, sess)
+        except KeyboardInterrupt:
+            print('Keyboard interrupt occurred')
+            stop_thread_runner(sess, model_settings)
+            print('Stopping request sent to threads..')
+            if model_settings['save_graph']:
+                save_graph(model_settings, sess)
 
 
 if __name__ == '__main__':

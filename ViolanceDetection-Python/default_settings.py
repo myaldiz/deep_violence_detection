@@ -1,20 +1,21 @@
 import numpy as np
+from datetime import datetime
+
+
 
 model_settings = {
     # Training settings
     'current_epoch': 1,
-    'max_steps': 10,
+    'max_steps': 100,
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
-    'learning_rate': 1e-4,  # 1e-4 from previous code
+    'learning_rate': 1e-3,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
     'batch_size': 10,  # Batch per GPU
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
     'train_fc': True,
-    'save_graph': False,
-
-    # Testing settings
+    'save_graph': True,
     'is_testing': False,
 
     # Neural-Network settings
@@ -32,19 +33,18 @@ model_settings = {
     'queue_size': 20,  # Queue size for reading input
 
     # Directory settings
-    'checkpoint_dir': './checkpoints',
-    # 'model_read_dir' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
-    'model_read_dir': './models/UCF_finetuneFC_last.model',
-    # 'model_save_dir' : './models/C3D_1.model',
+    'model_name': 'UCF_finetune',
+    'checkpoint_dir': './checkpoints/',
+    'model_save_dir': './models/',
+    # 'model_read_loc' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
+    'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
     'train_file_name': '/trainlist01.txt',
     # 'train_file_name': '/train_small.txt',
-    'test_file_name': '/trainlist02.txt',
+    'test_file_name': '/testlist01.txt',
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy'
 }
-
-
 def set_model_settings(model_settings):
     # Total number of batch
     model_settings['total_batch'] = model_settings['batch_size'] * model_settings['num_gpu']
@@ -65,5 +65,7 @@ def set_model_settings(model_settings):
         model_settings['dropout'] = 1.0
         model_settings['trans_max'] = 0
     else:
-        model_settings['input_from_placeholders'] = True
-        model_settings['dequeue_immediately'] = True
+        model_settings['input_from_placeholders'] = False
+        model_settings['dequeue_immediately'] = False
+
+    model_settings['start_time'] = datetime.now()

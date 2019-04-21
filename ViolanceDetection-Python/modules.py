@@ -48,6 +48,8 @@ def create_graph(model_settings):
                     else:
                         if model_settings['dequeue_immediately']:
                             read_batch_size = tf.math.minimum(queue.size(), model_settings['batch_size'])
+                            # Network will read at least one example
+                            read_batch_size = tf.math.maximum(1, read_batch_size)
                         else:
                             read_batch_size = tf.convert_to_tensor(model_settings['batch_size'])
 

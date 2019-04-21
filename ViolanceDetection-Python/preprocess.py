@@ -49,9 +49,11 @@ def read_clip(dirname, model_settings):
 
     # Select which portion of the video will be input
     rand_max = int(num_frame - ((num_frame / video_duration) * (frames_per_batch / video_fps)))
-    print(rand_max)
+
+    # if video is too short return null
     if rand_max < 0:
-        return []
+        return np.array([])
+
     start_frame = random.randint(0, rand_max - 1)
     # end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
     video_start = (video_duration / num_frame) * start_frame

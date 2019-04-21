@@ -27,8 +27,8 @@ model_settings = {
     'run_on_cpu': False,  # Training device
     'num_gpu': 1,  # Number of GPU's in the system
     'variable_storage': '/gpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
-    'num_thread': 1,  # Number of threads to read video files
-    'queue_size': 300,  # Queue size for reading input
+    'num_thread': 8,  # Number of threads to read video files
+    'queue_size': 600,  # Queue size for reading input
 
     # Directory settings
     'model_name': 'UCF_finetune',

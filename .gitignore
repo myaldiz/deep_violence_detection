@@ -42,11 +42,6 @@ config.rst
 package-lock.json
 geckodriver.log
 
-/train
-/test
 /imgs
 */models
 */checkpoints
-
-#Project Specific
-test.py

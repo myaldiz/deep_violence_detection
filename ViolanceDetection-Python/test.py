@@ -185,7 +185,7 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 # - Change default settings part to manually name the devices and
 #   number of batches they will process
 # - Solve issue of queues without soft placement
-# - Solve the issue of preprocessing
+# - Solve the issue of preprocessing during testing when data could not load
 
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,

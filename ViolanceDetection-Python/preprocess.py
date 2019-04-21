@@ -50,14 +50,10 @@ def read_clip(dirname, model_settings):
     # Select which portion of the video will be input
     rand_max = int(num_frame - ((num_frame / video_duration) * (frames_per_batch / video_fps)))
 
-    # if video is too short return null
-    if rand_max < 0:
-        return np.array([])
-
-    start_frame = random.randint(0, rand_max - 1)
+    start_frame = random.randint(0, max(rand_max - 1, 0))
     # end_frame = ceil(start_frame + (num_frame / video_duration) * frames_per_batch / video_fps + 1)
     video_start = (video_duration / num_frame) * start_frame
-    video_end = video_start + ((frames_per_batch + 1) / video_fps)
+    video_end = min(video_duration, video_start + ((frames_per_batch + 1) / video_fps))
 
     # Cropping factor
     x_pos = max(video_width - video_height + 2 * trans_factor, 0) // 2
@@ -86,6 +82,17 @@ def read_clip(dirname, model_settings):
     video = np.frombuffer(out, np.uint8). \
         reshape([-1, crop_size, crop_size, 3])
 
+    # Copies last frame if # of frames < 16
     # Subtracts the mean and converts type to float32
-    video = video[:16] - np_mean
+    num_frames = video.shape[0]
+    if num_frames < frames_per_batch:
+        last_frame = video[-1]
+
+        last_repeat = np.repeat(last_frame[np.newaxis],
+                                frames_per_batch - num_frames,
+                                axis=0)
+        video = np.concatenate((video, last_repeat), axis=0) - np_mean
+    else:
+        video = video[:frames_per_batch] - np_mean
+
     return video

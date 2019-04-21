@@ -182,6 +182,8 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 # - Check training code once more
 #   - Try to train and save parameters for once
 #   - Read the code once more
+# - Change default settings part to manually name the devices and
+#   number of batches they will process
 
 
 if __name__ == '__main__':

@@ -1,0 +1,226 @@
+2019-04-21 18:57:51.509128: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-04-21 18:57:53.491250: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-04-21 18:57:53.491821: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x55cb985d79c0 executing computations on platform CUDA. Devices:
+2019-04-21 18:57:53.491854: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): Tesla K80, Compute Capability 3.7
+2019-04-21 18:57:53.494759: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2200000000 Hz
+2019-04-21 18:57:53.494986: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x55cb98640440 executing computations on platform Host. Devices:
+2019-04-21 18:57:53.495013: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+2019-04-21 18:57:53.495424: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1433] Found device 0 with properties: 
+name: Tesla K80 major: 3 minor: 7 memoryClockRate(GHz): 0.8235
+pciBusID: 0000:00:04.0
+totalMemory: 11.17GiB freeMemory: 11.10GiB
+2019-04-21 18:57:53.495451: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1512] Adding visible gpu devices: 0
+2019-04-21 18:57:53.851737: I tensorflow/core/common_runtime/gpu/gpu_device.cc:984] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-04-21 18:57:53.851790: I tensorflow/core/common_runtime/gpu/gpu_device.cc:990]      0 
+2019-04-21 18:57:53.851812: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1003] 0:   N 
+2019-04-21 18:57:53.852085: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10754 MB memory) -> physical GPU (device: 0, name: Tesla K80, pci bus id: 0000:00:04.0, compute capability: 3.7)
+Exception in thread Thread-2:
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1334, in _do_call
+    return fn(*args)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1317, in _run_fn
+    self._extend_graph()
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1352, in _extend_graph
+    tf_session.ExtendSession(self._session)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node {{colocation_node Enqueue_Operation}} was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[{{node Enqueue_Operation}}]]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/threading.py", line 914, in _bootstrap_inner
+    self.run()
+  File "/usr/lib/python3.5/threading.py", line 862, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py", line 164, in load_and_enqueue
+    labels_placeholder: label})
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 929, in run
+    run_metadata_ptr)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1152, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1328, in _do_run
+    run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1348, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) having device No device assignments were active during op 'Enqueue_Operation' creation.  was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) ]]
+
+No node-device colocations were active during op 'Enqueue_Operation' creation.
+No device assignments were active during op 'Enqueue_Operation' creation.
+
+Caused by op 'Enqueue_Operation', defined at:
+  File "test.py", line 189, in <module>
+    run_testing(model_settings, sess)
+  File "test.py", line 98, in run_testing
+    set_queue(model_settings)
+  File "/home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py", line 136, in set_queue
+    name='Enqueue_Operation')
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/data_flow_ops.py", line 345, in enqueue
+    self._queue_ref, vals, name=scope)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/gen_data_flow_ops.py", line 4158, in queue_enqueue_v2
+    timeout_ms=timeout_ms, name=name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/op_def_library.py", line 788, in _apply_op_helper
+    op_def=op_def)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 3300, in create_op
+    op_def=op_def)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 1801, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+InvalidArgumentError (see above for traceback): Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) having device No device assignments were active during op 'Enqueue_Operation' creation.  was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) ]]
+
+No node-device colocations were active during op 'Enqueue_Operation' creation.
+No device assignments were active during op 'Enqueue_Operation' creation.
+
+
+WARNING:tensorflow:From /usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+WARNING:tensorflow:From /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/model.py:58: calling dropout (from tensorflow.python.ops.nn_ops) with keep_prob is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `rate` instead of `keep_prob`. Rate should be set to `rate = 1 - keep_prob`.
+Threads stopped!
+
+WARNING: The TensorFlow contrib module will not be included in TensorFlow 2.0.
+For more information, please see:
+  * https://github.com/tensorflow/community/blob/master/rfcs/20180907-contrib-sunset.md
+  * https://github.com/tensorflow/addons
+If you depend on functionality not listed there, please file an issue.
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1334, in _do_call
+    return fn(*args)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1317, in _run_fn
+    self._extend_graph()
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1352, in _extend_graph
+    tf_session.ExtendSession(self._session)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node {{colocation_node Enqueue_Operation}} was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[{{node Enqueue_Operation}}]]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "test.py", line 189, in <module>
+    run_testing(model_settings, sess)
+  File "test.py", line 116, in run_testing
+    sess.run(tf.global_variables_initializer())
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 929, in run
+    run_metadata_ptr)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1152, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1328, in _do_run
+    run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1348, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) having device No device assignments were active during op 'Enqueue_Operation' creation.  was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) ]]
+
+No node-device colocations were active during op 'Enqueue_Operation' creation.
+No device assignments were active during op 'Enqueue_Operation' creation.
+
+Caused by op 'Enqueue_Operation', defined at:
+  File "test.py", line 189, in <module>
+    run_testing(model_settings, sess)
+  File "test.py", line 98, in run_testing
+    set_queue(model_settings)
+  File "/home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py", line 136, in set_queue
+    name='Enqueue_Operation')
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/data_flow_ops.py", line 345, in enqueue
+    self._queue_ref, vals, name=scope)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/gen_data_flow_ops.py", line 4158, in queue_enqueue_v2
+    timeout_ms=timeout_ms, name=name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/op_def_library.py", line 788, in _apply_op_helper
+    op_def=op_def)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 3300, in create_op
+    op_def=op_def)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 1801, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+InvalidArgumentError (see above for traceback): Cannot assign a device for operation Enqueue_Operation: Could not satisfy explicit device specification '' because the node node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) having device No device assignments were active during op 'Enqueue_Operation' creation.  was colocated with a group of nodes that required incompatible device '/device:GPU:0'
+Colocation Debug Info:
+Colocation group had the following types and devices: 
+QueueDequeueManyV2: CPU 
+QueueSizeV2: CPU XLA_CPU XLA_GPU 
+QueueEnqueueV2: CPU XLA_CPU XLA_GPU 
+FIFOQueueV2: CPU 
+
+Colocation members and user-requested devices:
+  Input_Queue (FIFOQueueV2) 
+  Enqueue_Operation (QueueEnqueueV2) 
+  Tower_0/Input_Queue_Size (QueueSizeV2) /device:GPU:0
+  Tower_0/Input_Queue_DequeueMany (QueueDequeueManyV2) /device:GPU:0
+
+	 [[node Enqueue_Operation (defined at /home/deeplearning7643/deep_violence_detection/ViolanceDetection-Python/modules.py:136) ]]
+
+No node-device colocations were active during op 'Enqueue_Operation' creation.
+No device assignments were active during op 'Enqueue_Operation' creation.
+

@@ -185,7 +185,11 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 # - Change default settings part to manually name the devices and
 #   number of batches they will process
 
+def main():
+    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+                                          log_device_placement=True)) as sess:
+        run_testing(model_settings, sess)
+
 
 if __name__ == '__main__':
-    with tf.Session() as sess:
-        run_testing(model_settings, sess)
+    main()

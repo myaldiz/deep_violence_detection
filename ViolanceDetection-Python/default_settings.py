@@ -8,7 +8,7 @@ model_settings = {
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
     'learning_rate': 1e-3,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
-    'batch_size': 10,  # Batch per GPU
+    'batch_size': 30,  # Batch per GPU
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
@@ -24,11 +24,11 @@ model_settings = {
     'trans_max': 10,  # Translation factor for pre-processing
 
     # System settings
-    'run_on_cpu': True,  # Training device
+    'run_on_cpu': False,  # Training device
     'num_gpu': 1,  # Number of GPU's in the system
-    'variable_storage': '/cpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
+    'variable_storage': '/gpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
     'num_thread': 1,  # Number of threads to read video files
-    'queue_size': 20,  # Queue size for reading input
+    'queue_size': 300,  # Queue size for reading input
 
     # Directory settings
     'model_name': 'UCF_finetune',

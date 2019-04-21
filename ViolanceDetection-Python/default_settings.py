@@ -1,8 +1,6 @@
 import numpy as np
 from datetime import datetime
 
-
-
 model_settings = {
     # Training settings
     'current_epoch': 1,
@@ -45,6 +43,8 @@ model_settings = {
     'test_file_name': '/testlist01.txt',
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy'
 }
+
+
 def set_model_settings(model_settings):
     # Total number of batch
     model_settings['total_batch'] = model_settings['batch_size'] * model_settings['num_gpu']

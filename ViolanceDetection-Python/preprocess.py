@@ -140,7 +140,10 @@ def process_frames(model_settings):
         rem_frame = frames_per_batch - clips_shape[0]
 
         # Translate images by factor
-        trans_factor = tf.random.uniform([1], -trans_max, trans_max, dtype=tf.int32)
+        if model_settings['is_testing']:
+            trans_factor = tf.convert_to_tensor([0])
+        else:
+            trans_factor = tf.random.uniform([1], -trans_max, trans_max, dtype=tf.int32)
 
         # Crop pos calculation
         crop_size1 = tf.math.minimum(video_height, video_width)

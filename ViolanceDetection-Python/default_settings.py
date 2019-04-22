@@ -25,7 +25,7 @@ model_settings = {
 
     # System settings
     'devices_to_run': ['/gpu:0'],  # Multiple devices are not supported yet :(
-    'num_thread': 4,  # Number of threads to read video files
+    'num_thread': 8,  # Number of threads to read video files
     'queue_size': 3000,  # Queue size for reading input
 
     # Directory settings
@@ -65,7 +65,6 @@ def set_model_settings(model_settings):
         model_settings['input_from_placeholders'] = False
         model_settings['dequeue_immediately'] = True
         model_settings['dropout'] = 1.0
-        model_settings['trans_max'] = 0
     else:
         model_settings['input_from_placeholders'] = False
         model_settings['dequeue_immediately'] = False

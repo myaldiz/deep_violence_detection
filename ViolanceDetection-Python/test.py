@@ -184,9 +184,9 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 # - Solve issue of queues without soft placement
 
 def main():
-    # with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
-    #                                      log_device_placement=True)) as sess:
-    with tf.Session() as sess:
+    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+                                          log_device_placement=False)) as sess:
+    #with tf.Session() as sess:
         run_testing(model_settings, sess)
 
 

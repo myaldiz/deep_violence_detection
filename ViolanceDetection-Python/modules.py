@@ -2,7 +2,7 @@ import tensorflow as tf
 import threading
 from model import model, tower_loss, tower_accuracy
 from preprocess import read_clips_from_video, shuffle_list
-from preprocess import read_clips_from_frames
+from preprocess import get_frames_data, process_frames
 
 
 def average_gradients(tower_grads):
@@ -22,7 +22,7 @@ def average_gradients(tower_grads):
             # TODO: fix the tower gradient mean into weighted mean
             # for multi tower implementation
             grad = tf.reduce_mean(grad, 0)
-            #grad = tf.metrics.mean(grad, weights=[])
+            # grad = tf.metrics.mean(grad, weights=[])
 
             # Keep in mind that the Variables are redundant because they are shared
             # across towers. So .. we will just return the first tower's pointer to
@@ -106,7 +106,12 @@ def create_training_op(model_settings):
 
 
 def set_placeholders(model_settings):
-    images_placeholder = tf.placeholder(tf.float32, shape=model_settings['input_shape'], name="input_clip")
+    if model_settings['read_from_frames']:
+        shape = (None, None, None, 3)
+        images_placeholder = tf.placeholder(tf.float32, shape=shape, name="input_clip")
+    else:
+        images_placeholder = tf.placeholder(tf.float32, shape=model_settings['input_shape'], name="input_clip")
+
     labels_placeholder = tf.placeholder(tf.int64, shape=(), name="labels")
     dropout_placeholder = tf.placeholder_with_default(model_settings['dropout'], shape=())
 
@@ -117,7 +122,7 @@ def set_placeholders(model_settings):
 
 
 def set_queue(model_settings):
-    images_placeholder = model_settings['images_placeholder']
+    clips = model_settings['images_placeholder']
     labels_placeholder = model_settings['labels_placeholder']
 
     queue = tf.FIFOQueue(model_settings['queue_size'],
@@ -125,8 +130,11 @@ def set_queue(model_settings):
                          shapes=[model_settings['input_shape'],
                                  labels_placeholder.shape],
                          name='Input_Queue')
+    # Process frames through tensorflow
+    if model_settings['read_from_frames']:
+        clips = process_frames(model_settings)
 
-    enqueue_op = queue.enqueue([images_placeholder,
+    enqueue_op = queue.enqueue([clips,
                                 labels_placeholder],
                                name='Enqueue_Operation')
 
@@ -153,14 +161,12 @@ def load_and_enqueue(sess, model_settings, thread_index):
         video_dir = model_settings['data_home'] + video_dir
 
         if model_settings['read_from_frames']:
-            input_clip = read_clips_from_frames(video_dir, model_settings, sess)
+            input_clip = get_frames_data(video_dir, model_settings)
         else:
             input_clip = read_clips_from_video(video_dir, model_settings)
 
-        # if input clip is not empty
-        if input_clip.shape == model_settings['input_shape']:
-            sess.run(enqueue_op, feed_dict={images_placeholder: input_clip,
-                                            labels_placeholder: label})
+        sess.run(enqueue_op, feed_dict={images_placeholder: input_clip,
+                                        labels_placeholder: label})
 
 
 def queue_thread_runner(sess, model_settings):

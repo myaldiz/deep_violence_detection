@@ -67,7 +67,8 @@ def run_training(model_settings, sess):
     # Read training file locations
     train_dir_locations = model_settings['train_test_loc'] + \
                           model_settings['train_file_name']
-    model_settings['input_list'] = get_data_dir(train_dir_locations)
+    model_settings['input_list'] = get_data_dir(train_dir_locations,
+                                                model_settings)
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()
@@ -127,7 +128,7 @@ def run_training(model_settings, sess):
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                           log_device_placement=False)) as sess:
-    #with tf.Session() as sess:
+        # with tf.Session() as sess:
         try:
             run_training(model_settings, sess)
         except KeyboardInterrupt:

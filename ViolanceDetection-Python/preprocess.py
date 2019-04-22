@@ -2,15 +2,19 @@ import random, time, ffmpeg
 import os
 import numpy as np
 import tensorflow as tf
+import PIL.Image as Image
 
 
 # Reads train/test filenames from provided splits
 # Returns video directions and their labels in a list
-def get_data_dir(filename):
+def get_data_dir(filename, model_settings):
     dir_videos, label_videos = [], []
     with open(filename, 'r') as input_file:
         for line in input_file:
             file_name, label = line.split(' ')
+            # if will read from frames
+            if model_settings['read_from_frames']:
+                file_name = '.'.join(file_name.split('.')[:-1])
             dir_videos.append(file_name)
             label_videos.append(int(label) - 1)
     return dir_videos, label_videos
@@ -90,7 +94,7 @@ def read_clips_from_video(dirname, model_settings):
     if num_frames < frames_per_batch:
         last_frame = video[-1]
         num_frame_repeat = frames_per_batch - num_frames
-        print('Frames repeated: ', num_frame_repeat)
+        # print('Frames repeated: ', num_frame_repeat)
         last_repeat = np.repeat(last_frame[np.newaxis],
                                 num_frame_repeat,
                                 axis=0)
@@ -101,13 +105,16 @@ def read_clips_from_video(dirname, model_settings):
     return video
 
 
-def get_frames_data(filename, start_index, num_frames_per_clip=16):
+def get_frames_data(filename, model_settings):
+    frames_per_batch = model_settings['frames_per_batch']
     ret_arr = []
     for parent, dirnames, filenames in os.walk(filename):
-        if len(filenames) < num_frames_per_clip:
-            return np.array([])
+        num_frames = len(filenames)
+        start_max = max(0, num_frames - frames_per_batch)
+        start_index = random.randint(0, start_max)
+        end_index = min(start_index + frames_per_batch, num_frames)
         filenames = sorted(filenames)
-        for i in range(start_index - 1, start_index + num_frames_per_clip - 1):
+        for i in range(start_index, end_index):
             image_name = str(filename) + '/' + str(filenames[i])
             img = Image.open(image_name)
             img_data = np.array(img)
@@ -115,5 +122,46 @@ def get_frames_data(filename, start_index, num_frames_per_clip=16):
     return ret_arr
 
 
-def read_clips_from_frames(dirname, model_settings, sess):
-    pass
+def process_frames(model_settings):
+    with tf.name_scope('Frame_Process'), tf.device('/cpu:0'):
+        # Get the variables
+        images_placeholder = model_settings['images_placeholder']
+        trans_max = model_settings['trans_max']
+        crop_size = model_settings['crop_size']
+        frames_per_batch = model_settings['frames_per_batch']
+        np_mean = tf.convert_to_tensor(model_settings['np_mean'])
+
+        # Shape setting
+        clips_shape = tf.shape(images_placeholder)
+        video_width = clips_shape[1]
+        video_height = clips_shape[2]
+
+        # Calculate remaining frames
+        rem_frame = frames_per_batch - clips_shape[0]
+
+        # Translate images by factor
+        trans_factor = tf.random.uniform([1], -trans_max, trans_max, dtype=tf.int32)
+
+        # Crop pos calculation
+        crop_size1 = tf.math.minimum(video_height, video_width)
+        x_pos = tf.math.maximum(video_width - video_height + 2 * trans_factor, 0) // 2
+        x_start, x_end = x_pos[0], x_pos[0] + crop_size1
+        y_pos = tf.math.maximum(video_height - video_width + 2 * trans_factor, 0) // 2
+        y_start, y_end = y_pos[0], y_pos[0] + crop_size1
+
+        # Crop the images
+        clips_cropped = images_placeholder[:, x_start:x_end, y_start:y_end]
+
+        # Interpolate
+        clips_interp = tf.image.resize_bicubic(clips_cropped, (crop_size, crop_size))
+        clips_interp = tf.clip_by_value(clips_interp, 0, 255)
+        last_frame = clips_interp[-1]
+
+        # Tile the remaining frames for final 16 frames
+        rem_frames = tf.tile(tf.expand_dims(last_frame, 0), [rem_frame, 1, 1, 1])
+        final_clips = tf.concat([clips_interp, rem_frames], 0)
+        # Flip by a chance
+        final_clips = tf.image.random_flip_left_right(final_clips)
+        # Subtract the mean
+        final_clips -= np_mean
+    return final_clips

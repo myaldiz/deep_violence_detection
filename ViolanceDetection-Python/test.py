@@ -100,7 +100,8 @@ def run_testing(model_settings, sess):
     # Read training file locations
     test_dir_locations = model_settings['train_test_loc'] + \
                          model_settings['test_file_name']
-    model_settings['input_list'] = get_data_dir(test_dir_locations)
+    model_settings['input_list'] = get_data_dir(test_dir_locations,
+                                                model_settings)
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()

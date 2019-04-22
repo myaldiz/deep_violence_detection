@@ -8,7 +8,7 @@ model_settings = {
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
     'learning_rate': 1e-4,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
-    'batch_sizes': [30],  # Batch per device
+    'batch_sizes': [10],  # Batch per device
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
@@ -24,18 +24,18 @@ model_settings = {
     'trans_max': 10,  # Translation factor for pre-processing
 
     # System settings
-    'devices_to_run': ['/gpu:0'],  # Multiple devices are not supported yet :(
-    'num_thread': 4,  # Number of threads to read video files
-    'queue_size': 3000,  # Queue size for reading input
+    'devices_to_run': ['/cpu:0'],  # Multiple devices are not supported yet :(
+    'num_thread': 2,  # Number of threads to read video files
+    'queue_size': 100,  # Queue size for reading input
 
     # Directory settings
-    'read_from_frames': False,
+    'read_from_frames': True,
     'model_name': 'UCF_finetune',
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
     # 'model_read_loc' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
     'model_read_loc': './models/UCF_finetuneFC_last.model',
-    'data_home': '../datasets/UCF-101-Videos/',
+    'data_home': '../datasets/UCF-101-Frames/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
     'train_file_name': '/trainlist01.txt',
     # 'train_file_name': '/train_small.txt',

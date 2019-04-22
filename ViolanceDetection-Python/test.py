@@ -176,12 +176,12 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 
 
 # TODO:
+# Fix pre-processing!
+# - Check training code once more
+#   - Try to train and save parameters for once
 # - Implement Extract Features method
 # - Implement classification of the video feed
 #   - Showing top 3 classification
-# - Check training code once more
-#   - Try to train and save parameters for once
-# - Solve issue of queues without soft placement
 
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,

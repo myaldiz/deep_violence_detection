@@ -8,7 +8,7 @@ model_settings = {
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
     'learning_rate': 1e-4,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
-    'batch_sizes': [30, 2],  # Batch per device
+    'batch_sizes': [30],  # Batch per device
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
@@ -24,7 +24,7 @@ model_settings = {
     'trans_max': 10,  # Translation factor for pre-processing
 
     # System settings
-    'devices_to_run': ['/gpu:0', '/cpu:0'],
+    'devices_to_run': ['/gpu:0'],  # Multiple devices are not supported yet :(
     'num_thread': 4,  # Number of threads to read video files
     'queue_size': 3000,  # Queue size for reading input
 
@@ -45,8 +45,8 @@ model_settings = {
 
 def set_model_settings(model_settings):
     # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
-    # model_settings['variable_storage'] = model_settings['devices_to_run'][0]
-    model_settings['variable_storage'] = '/cpu:0'
+    model_settings['variable_storage'] = model_settings['devices_to_run'][0]
+    # model_settings['variable_storage'] = '/cpu:0'
     # Total number of batch
     model_settings['total_batch'] = np.sum(model_settings['batch_sizes'])
 

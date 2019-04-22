@@ -87,9 +87,10 @@ def read_clip(dirname, model_settings):
     num_frames = video.shape[0]
     if num_frames < frames_per_batch:
         last_frame = video[-1]
-
+        num_frame_repeat = frames_per_batch - num_frames
+        print('Frames repeated: ', num_frame_repeat)
         last_repeat = np.repeat(last_frame[np.newaxis],
-                                frames_per_batch - num_frames,
+                                num_frame_repeat,
                                 axis=0)
         video = np.concatenate((video, last_repeat), axis=0) - np_mean
     else:

@@ -9,15 +9,13 @@ from datetime import datetime
 
 
 def show_running_info(model_settings, duration, step, loss, accuracy):
-    batch_size, num_gpu = model_settings['batch_size'], model_settings['num_gpu']
     num_examples_per_step = model_settings['total_batch']
     epoch = model_settings['current_epoch']
     examples_per_sec = num_examples_per_step / duration
-    sec_per_batch = duration / num_gpu
     format_str = ('Epoch: %d, %s: step %d, (%.1f examples/sec; %.3f'
                   'sec/batch), (accuracy: %f loss: %f)')
     format_tuple = (epoch, datetime.now(), step,
-                    examples_per_sec, sec_per_batch, accuracy, loss)
+                    examples_per_sec, duration, accuracy, loss)
     print(format_str % format_tuple)
 
 
@@ -127,8 +125,9 @@ def run_training(model_settings, sess):
 
 
 def main():
-    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
-                                          log_device_placement=True)) as sess:
+    # with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+    #                                      log_device_placement=True)) as sess:
+    with tf.Session() as sess:
         try:
             run_training(model_settings, sess)
         except KeyboardInterrupt:

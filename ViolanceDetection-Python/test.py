@@ -148,7 +148,8 @@ def run_testing(model_settings, sess):
 
     print('----------------------------------------------------------------')
     print('Testing finished,')
-    print('\nAccuracy:', np.average(batch_accuracy, weights=batch_size))
+    print('')
+    print('Accuracy:', np.average(batch_accuracy, weights=batch_size))
 
 
 def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, data_size):
@@ -163,8 +164,8 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 
     format_str = (
         'Step: %d/%d, Percentage Finished: %.3f, Time left: %s'
-        ' --Cur accuracy: %.2f, Cur loss: %.4f--'
-        ' --Average accuracy: %.3f, Average loss: %.4f--'
+        ' - Cur accuracy: %.2f, Cur loss: %.4f -||- '
+        'Average accuracy: %.3f, Average loss: %.4f -'
     )
     format_tuple = (
         total_examples_read, data_size, percentage_read,
@@ -175,21 +176,17 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 
 
 # TODO:
-# - Test testing code, make it better
 # - Implement Extract Features method
 # - Implement classification of the video feed
 #   - Showing top 3 classification
 # - Check training code once more
 #   - Try to train and save parameters for once
-#   - Read the code once more
-# - Change default settings part to manually name the devices and
-#   number of batches they will process
 # - Solve issue of queues without soft placement
-# - Solve the issue of preprocessing during testing when data could not load
 
 def main():
-    with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
-                                          log_device_placement=True)) as sess:
+    # with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
+    #                                      log_device_placement=True)) as sess:
+    with tf.Session() as sess:
         run_testing(model_settings, sess)
 
 

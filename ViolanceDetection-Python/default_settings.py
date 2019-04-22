@@ -6,9 +6,9 @@ model_settings = {
     'current_epoch': 1,
     'max_steps': 1000,
     'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
-    'learning_rate': 1e-3,  # 1e-4 from previous code
+    'learning_rate': 1e-4,  # 1e-4 from previous code
     'checkpoints': 200,  # Number of steps to create checkpoint
-    'batch_size': 30,  # Batch per GPU
+    'batch_sizes': [10],  # Batch per device
     'read_pretrained_model': True,
     'load_fc_layers': True,
     'train_conv': False,
@@ -24,11 +24,9 @@ model_settings = {
     'trans_max': 10,  # Translation factor for pre-processing
 
     # System settings
-    'run_on_cpu': False,  # Training device
-    'num_gpu': 1,  # Number of GPU's in the system
-    'variable_storage': '/gpu:0',  # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
-    'num_thread': 8,  # Number of threads to read video files
-    'queue_size': 600,  # Queue size for reading input
+    'devices_to_run': ['/cpu:0'],
+    'num_thread': 4,  # Number of threads to read video files
+    'queue_size': 300,  # Queue size for reading input
 
     # Directory settings
     'model_name': 'UCF_finetune',
@@ -46,8 +44,10 @@ model_settings = {
 
 
 def set_model_settings(model_settings):
+    # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
+    model_settings['variable_storage'] = model_settings['devices_to_run'][0]
     # Total number of batch
-    model_settings['total_batch'] = model_settings['batch_size'] * model_settings['num_gpu']
+    model_settings['total_batch'] = np.sum(model_settings['batch_sizes'])
 
     # Input shape for placeholders
     model_settings['input_shape'] = (model_settings['frames_per_batch'],

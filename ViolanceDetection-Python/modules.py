@@ -17,7 +17,11 @@ def average_gradients(tower_grads):
 
             # Average over the 'tower' dimension.
             grad = tf.concat(axis=0, values=grads)
+
+            # TODO: fix the tower gradient mean into weighted mean
+            # for multi tower implementation
             grad = tf.reduce_mean(grad, 0)
+            #grad = tf.metrics.mean(grad, weights=[])
 
             # Keep in mind that the Variables are redundant because they are shared
             # across towers. So .. we will just return the first tower's pointer to
@@ -33,29 +37,25 @@ def create_graph(model_settings):
     tower_accuracies = []
     tower_losses = []
     with tf.variable_scope(tf.get_variable_scope()):
-        for gpu_index in range(model_settings['num_gpu']):
-            # if run on cpu specified
-            if model_settings['run_on_cpu']:
-                running_device = '/cpu:0'
-            else:
-                # otherwise run on GPU
-                running_device = '/gpu:%d' % gpu_index
-            with tf.device(running_device):
-                with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    if model_settings['input_from_placeholders']:
-                        feed_input = [model_settings['images_placeholder']]
-                        feed_label = [model_settings['labels_placeholder']]
+        enum_val = enumerate(zip(model_settings['devices_to_run'], model_settings['batch_sizes']))
+        for device_index, (device_name, batch_size) in enum_val:
+            with tf.name_scope('Tower_%d' % device_index) as scope:
+                # Input prep for the tower
+                if model_settings['input_from_placeholders']:
+                    feed_input = [model_settings['images_placeholder']]
+                    feed_label = [model_settings['labels_placeholder']]
+                else:
+                    if model_settings['dequeue_immediately']:
+                        read_batch_size = tf.math.minimum(queue.size(), batch_size)
+                        # Network will read at least one example
+                        read_batch_size = tf.math.maximum(1, read_batch_size)
                     else:
-                        if model_settings['dequeue_immediately']:
-                            read_batch_size = tf.math.minimum(queue.size(), model_settings['batch_size'])
-                            # Network will read at least one example
-                            read_batch_size = tf.math.maximum(1, read_batch_size)
-                        else:
-                            read_batch_size = tf.convert_to_tensor(model_settings['batch_size'])
+                        read_batch_size = tf.convert_to_tensor(batch_size)
 
-                        model_settings['read_batch_size'] = read_batch_size
-                        feed_input, feed_label = queue.dequeue_many(read_batch_size)
+                    model_settings['read_batch_size'] = read_batch_size
+                    feed_input, feed_label = queue.dequeue_many(read_batch_size)
 
+                with tf.device(device_name):
                     model_out = model(feed_input, model_settings)
 
                     loss = tower_loss(scope, model_out, feed_label)
@@ -84,16 +84,11 @@ def create_training_op(model_settings):
 
     tower_grads = []
     with tf.variable_scope(tf.get_variable_scope()):
-        for gpu_index in range(model_settings['num_gpu']):
-            # if run on cpu specified
-            if model_settings['run_on_cpu']:
-                running_device = '/cpu:0'
-            else:
-                # otherwise run on GPU
-                running_device = '/gpu:%d' % gpu_index
-            with tf.device(running_device):
-                with tf.name_scope('Tower_%d' % gpu_index) as scope:
-                    loss = tower_losses[gpu_index]
+        enum_val = enumerate(zip(model_settings['devices_to_run'], model_settings['batch_sizes']))
+        for device_index, (device_name, batch_size) in enum_val:
+            with tf.device(device_name):
+                with tf.name_scope('Tower_%d' % device_index) as scope:
+                    loss = tower_losses[device_index]
                     grads = opt.compute_gradients(loss)
                     tower_grads.append(grads)
     grads = average_gradients(tower_grads)
@@ -113,12 +108,11 @@ def set_placeholders(model_settings):
     images_placeholder = tf.placeholder(tf.float32, shape=model_settings['input_shape'], name="input_clip")
     labels_placeholder = tf.placeholder(tf.int64, shape=(), name="labels")
     dropout_placeholder = tf.placeholder_with_default(model_settings['dropout'], shape=())
-    # tf.summary.image('input_batch_sample_image', images_placeholder[:,0], total_batch)
 
     model_settings['images_placeholder'] = images_placeholder
     model_settings['labels_placeholder'] = labels_placeholder
     model_settings['dropout_placeholder'] = dropout_placeholder
-    return
+    print('Finished setting placeholders..')
 
 
 def set_queue(model_settings):
@@ -136,6 +130,7 @@ def set_queue(model_settings):
                                name='Enqueue_Operation')
 
     model_settings['queue'], model_settings['enqueue_op'] = queue, enqueue_op
+    print('Finished setting queue..')
 
 
 # Read single clip at a time
@@ -206,4 +201,4 @@ def stop_thread_runner(sess, model_settings):
         queue_size = sess.run(queue.size())
         if queue_size < model_settings['total_batch']:
             break
-        sess.run(queue.dequeue_many(model_settings['batch_size']))
+        sess.run(queue.dequeue_many(model_settings['total_batch']))

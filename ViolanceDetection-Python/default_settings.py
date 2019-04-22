@@ -29,12 +29,13 @@ model_settings = {
     'queue_size': 3000,  # Queue size for reading input
 
     # Directory settings
+    'read_from_frames': False,
     'model_name': 'UCF_finetune',
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
     # 'model_read_loc' : '../ViolanceDetection-Jupyter/models/s1m-ucf101.model',
     'model_read_loc': './models/UCF_finetuneFC_last.model',
-    'data_home': '../datasets/UCF-101/',
+    'data_home': '../datasets/UCF-101-Videos/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
     'train_file_name': '/trainlist01.txt',
     # 'train_file_name': '/train_small.txt',

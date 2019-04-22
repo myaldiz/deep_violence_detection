@@ -1,7 +1,8 @@
 import tensorflow as tf
 import threading
 from model import model, tower_loss, tower_accuracy
-from preprocess import read_clip, shuffle_list
+from preprocess import read_clips_from_video, shuffle_list
+from preprocess import read_clips_from_frames
 
 
 def average_gradients(tower_grads):
@@ -151,7 +152,10 @@ def load_and_enqueue(sess, model_settings, thread_index):
         video_dir, label = dir_videos[read_index], label_clips[read_index]
         video_dir = model_settings['data_home'] + video_dir
 
-        input_clip = read_clip(video_dir, model_settings)
+        if model_settings['read_from_frames']:
+            input_clip = read_clips_from_frames(video_dir, model_settings, sess)
+        else:
+            input_clip = read_clips_from_video(video_dir, model_settings)
 
         # if input clip is not empty
         if input_clip.shape == model_settings['input_shape']:

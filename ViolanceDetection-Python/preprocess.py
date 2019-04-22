@@ -1,5 +1,7 @@
 import random, time, ffmpeg
+import os
 import numpy as np
+import tensorflow as tf
 
 
 # Reads train/test filenames from provided splits
@@ -27,7 +29,7 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
 
 # Given video directory it reads the video
 # extracts the frames, and do pre-processing operation
-def read_clip(dirname, model_settings):
+def read_clips_from_video(dirname, model_settings):
     # Input size for the network
     frames_per_batch = model_settings['frames_per_batch']
     video_fps = model_settings['video_fps']
@@ -97,3 +99,21 @@ def read_clip(dirname, model_settings):
         video = video[:frames_per_batch] - np_mean
 
     return video
+
+
+def get_frames_data(filename, start_index, num_frames_per_clip=16):
+    ret_arr = []
+    for parent, dirnames, filenames in os.walk(filename):
+        if len(filenames) < num_frames_per_clip:
+            return np.array([])
+        filenames = sorted(filenames)
+        for i in range(start_index - 1, start_index + num_frames_per_clip - 1):
+            image_name = str(filename) + '/' + str(filenames[i])
+            img = Image.open(image_name)
+            img_data = np.array(img)
+            ret_arr.append(img_data)
+    return ret_arr
+
+
+def read_clips_from_frames(dirname, model_settings, sess):
+    pass

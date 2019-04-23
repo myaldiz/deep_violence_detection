@@ -46,7 +46,7 @@ def fc_layer(model_settings, tensor_in, w_name,
         b = _variable(model_settings, b_name, shape_bias,
                       tf.constant_initializer(0.0), trainable=trainable)
 
-        if model_settings['load_fc_layers']:
+        if model_settings['load_fc6_fc7']:
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, w)
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, b)
 
@@ -72,7 +72,6 @@ def max_pool_3d(tensor_in, k, layer_name='max_pool'):
 def model(_X, model_settings):
     wd = model_settings['weight_decay']
     train_conv = model_settings['train_conv']
-    train_fc = model_settings['train_fc']
 
     # Convolution 1a
     conv1 = conv3d_layer(model_settings, _X, 'wc1a', 'bc1a',
@@ -110,18 +109,22 @@ def model(_X, model_settings):
     dense1 = tf.reshape(pool5, [-1, 8192])
 
     # FC6 and FC7
-    dense1 = fc_layer(model_settings, dense1, 'wd1', 'bd1', [8192, 4096],
-                      [4096], 'FC6', train_fc)
-    dense2 = fc_layer(model_settings, dense1, 'wd2', 'bd2', [4096, 4096],
-                      [4096], 'FC7', train_fc)
+    dense1 = fc_layer(model_settings, dense1, 'wd1', 'bd1',
+                      [8192, 4096], [4096], 'FC6',
+                      model_settings['train_fc6_fc7'])
+    dense2 = fc_layer(model_settings, dense1, 'wd2', 'bd2',
+                      [4096, 4096], [4096], 'FC7',
+                      model_settings['train_fc6_fc7'])
 
     model_settings['clip_features'] = dense2
 
     # Last affine transformation for classification
     with tf.variable_scope('Softmax_Linear'):
-        w_out = _variable_with_weight_decay(model_settings, 'wout', [4096, 101], train_fc)
-        b_out = _variable(model_settings, 'bout', [101], tf.constant_initializer(0.0), train_fc)
-        if model_settings['load_fc_layers']:
+        w_out = _variable_with_weight_decay(model_settings, 'wout', [4096, 101],
+                                            model_settings['train_softmax_linear'])
+        b_out = _variable(model_settings, 'bout', [101], tf.constant_initializer(0.0),
+                          model_settings['train_softmax_linear'])
+        if model_settings['load_softmax_linear']:
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, w_out)
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, b_out)
         out = tf.matmul(dense2, w_out) + b_out

@@ -187,7 +187,6 @@ def queue_thread_runner(sess, model_settings):
 
         # Wait threads to finish
         coord.join(t)
-        model_settings['current_epoch'] += 1
         # if in testing mode
         if model_settings['is_testing']:
             break

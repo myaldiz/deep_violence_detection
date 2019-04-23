@@ -118,6 +118,7 @@ def run_training(model_settings, sess):
         else:
             _, summary_str, tower_mean_loss, tower_mean_acc = \
                 sess.run([train_op, summary_op, loss_op, acc_op])
+            # TODO: Run this part in different thread
             summary_writer.add_summary(summary_str, step)
 
         # Graph saving checkpoints

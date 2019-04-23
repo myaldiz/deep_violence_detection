@@ -31,9 +31,11 @@ def conv3d_layer(model_settings, tensor_in,
         conv = tf.nn.conv3d(tensor_in, w, strides=[1, 1, 1, 1, 1], padding='SAME', name='conv')
         conv_b = tf.nn.bias_add(conv, b, name='conv_bias')
         act = tf.nn.relu(conv_b, 'relu')
-        tf.summary.histogram('Convolution_Weights', w)
-        tf.summary.histogram('Conv_Biases', b)
-        tf.summary.histogram('Conv_Activations', act)
+        # Visualization part
+        if trainable:
+            tf.summary.histogram('Convolution_Weights', w)
+            tf.summary.histogram('Conv_Biases', b)
+            tf.summary.histogram('Conv_Activations', act)
         return act
 
 
@@ -56,9 +58,11 @@ def fc_layer(model_settings, tensor_in, w_name,
         tensor_out = tf.nn.dropout(act,
                                    model_settings['dropout_placeholder'],
                                    name='dropout')
-        tf.summary.histogram('FC_Weights', w)
-        tf.summary.histogram('FC_Biases', b)
-        tf.summary.histogram('FC_Activations', act)
+        # Visualization part
+        if trainable:
+            tf.summary.histogram('FC_Weights', w)
+            tf.summary.histogram('FC_Biases', b)
+            tf.summary.histogram('FC_Activations', act)
         return tensor_out
 
 
@@ -128,6 +132,9 @@ def model(_X, model_settings):
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, w_out)
             tf.add_to_collection(tf.GraphKeys.MODEL_VARIABLES, b_out)
         out = tf.matmul(dense2, w_out) + b_out
+
+        tf.summary.histogram('FC_Weights', w_out)
+        tf.summary.histogram('FC_Biases', b_out)
 
     return out
 

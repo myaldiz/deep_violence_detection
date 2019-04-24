@@ -46,16 +46,21 @@ model_settings = {
     'train_file_name': '/trainlist01.txt',
     # 'train_file_name': '/train_small.txt',
     'test_file_name': '/testlist01.txt',
-    'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy'
+    'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy',
+
+    # Feature Extraction Directory Settings
+    'feature_data_home': '../datasets/HockeyFights/',
+    'feature_loc': '../datasets/HockeyFights-Splits',
+    'feature_extract_file_name': '/datalist.txt'
 }
 
 
 def set_model_settings(model_settings):
-    # # Settings for the local computer
-    # model_settings['queue_size'] = 100
-    # model_settings['num_thread'] = 1
-    # model_settings['batch_sizes'] = [5]
-    # model_settings['devices_to_run'] = ['/cpu:0']
+    # Settings for the local computer
+    model_settings['queue_size'] = 100
+    model_settings['num_thread'] = 1
+    model_settings['batch_sizes'] = [5]
+    model_settings['devices_to_run'] = ['/cpu:0']
 
     # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
     model_settings['variable_storage'] = model_settings['devices_to_run'][0]
@@ -74,9 +79,18 @@ def set_model_settings(model_settings):
         reshape(model_settings['input_shape'])
 
     if model_settings['is_testing']:
-        model_settings['input_from_placeholders'] = False
-        model_settings['dequeue_immediately'] = True
-        model_settings['dropout'] = 1.0
+        test_settings = {
+            'input_from_placeholders': False,
+            'dequeue_immediately': True,
+            'dropout': 1.0,
+            'read_pretrained_model': True,
+            'train_conv': False,
+            'train_fc6_fc7': False,
+            'train_softmax_linear': False,
+        }
+        for key, value in test_settings.items():
+            model_settings[key] = value
+
     else:
         model_settings['input_from_placeholders'] = False
         model_settings['dequeue_immediately'] = False

@@ -68,12 +68,15 @@ def create_graph(model_settings):
 
     tower_mean_loss = tf.reduce_mean(tower_losses)
     tower_mean_accuracy = tf.reduce_mean(tower_accuracies)
+    features_stacked = tf.concat(model_settings['clip_features'], 0)
+
     tf.summary.scalar('Total_Loss', tower_mean_loss)
     tf.summary.scalar('Top1_Correct_Predictions', tower_mean_accuracy)
 
     model_settings['tower_mean_loss'] = tower_mean_loss
     model_settings['tower_mean_accuracy'] = tower_mean_accuracy
     model_settings['tower_losses'] = tower_losses
+    model_settings['stacked_features'] = features_stacked
 
 
 def create_training_op(model_settings):

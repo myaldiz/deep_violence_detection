@@ -120,7 +120,10 @@ def model(_X, model_settings):
                       [4096, 4096], [4096], 'FC7',
                       model_settings['train_fc6_fc7'])
 
-    model_settings['clip_features'] = dense2
+    if 'clip_features' in model_settings:
+        model_settings['clip_features'].append(dense2)
+    else:
+        model_settings['clip_features'] = [dense2]
 
     # Last affine transformation for classification
     with tf.variable_scope('Softmax_Linear'):

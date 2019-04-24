@@ -77,11 +77,9 @@ def create_graph(model_settings):
 
 
 def create_training_op(model_settings):
-    global_step = tf.get_variable('Global_Step', [],
-                                  initializer=tf.constant_initializer(0),
-                                  trainable=False)
-
-    opt, tower_losses = model_settings['optimizer'], model_settings['tower_losses']
+    opt = model_settings['optimizer']
+    tower_losses = model_settings['tower_losses']
+    global_step = model_settings['global_step']
 
     tower_grads = []
     with tf.variable_scope(tf.get_variable_scope()):
@@ -95,10 +93,12 @@ def create_training_op(model_settings):
     grads = average_gradients(tower_grads)
 
     apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
-    variable_averages = tf.train.ExponentialMovingAverage(model_settings['moving_decay'], global_step)
-    variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
-    train_op = tf.group(apply_gradient_op, variable_averages_op)
+    # Learning rate decay through learning rate only, using
+    # variable_averages = tf.train.ExponentialMovingAverage(model_settings['moving_decay'], global_step)
+    # variable_averages_op = variable_averages.apply(tf.trainable_variables())
+    # train_op = tf.group(apply_gradient_op, variable_averages_op)
+    train_op = apply_gradient_op
 
     summary_op = tf.summary.merge_all()
 

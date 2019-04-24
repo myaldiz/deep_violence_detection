@@ -3,9 +3,12 @@ from datetime import datetime
 
 model_settings = {
     # Training settings
-    'max_epoch': 12,
-    'moving_decay': 0.9999, 'weight_decay': 0.00005, 'dropout': 0.5,
-    'learning_rate': 3e-4,  # 1e-4 from previous code
+    'max_epoch': 10,
+    'learning_rate': 1e-3,  # 1e-4 from previous code
+    'lr_decay': 0.4,
+    'decay_epoch': 2,
+    'weight_decay': 0.00005,
+    'dropout': 0.5,
     'summary_checkpoints': 100,  # Number of steps to create checkpoint
     'model_save_checkpoints': 300,
     'batch_sizes': [30],  # Batch per device -- Original total is 30

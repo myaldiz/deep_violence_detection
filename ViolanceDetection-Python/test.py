@@ -153,6 +153,69 @@ def run_testing(model_settings, sess):
     print('Accuracy:', np.average(batch_accuracy, weights=batch_size))
 
 
+def extract_features(model_settings, sess):
+    model_settings['is_testing'] = True
+    set_model_settings(model_settings)
+
+    set_placeholders(model_settings)
+    set_queue(model_settings)
+
+    # Read training file locations
+    test_dir_locations = model_settings['train_test_loc'] + \
+                         model_settings['test_file_name']
+    model_settings['input_list'] = get_data_dir(test_dir_locations,
+                                                model_settings)
+
+    # Initialize file thread Coordinator and Start input reading threads
+    model_settings['coord'] = tf.train.Coordinator()
+    start_queue_threads(sess, model_settings)
+
+    # Create Graph
+    create_graph(model_settings)
+
+    # Save Only Model Variables
+    saver = tf.train.Saver(tf.get_collection('all_variables'))
+
+    # Initialize variables
+    sess.run(tf.global_variables_initializer())
+    sess.run(tf.local_variables_initializer())
+
+    # Restore saved model variables
+    if model_settings['read_pretrained_model']:
+        saver.restore(sess, model_settings['model_read_loc'])
+        print('Read the models successfully..')
+
+    loss_op = model_settings['tower_mean_loss']
+    acc_op = model_settings['tower_mean_accuracy']
+    read_batch_size = model_settings['read_batch_size']
+
+    data_size = len(model_settings['input_list'][0])
+
+    print('Total testing examples:', data_size)
+    print('Testing begins..')
+    batch_accuracy = []
+    batch_loss = []
+    batch_size = []
+    total_num_tested_data = 0
+
+    while total_num_tested_data != data_size:
+        tower_mean_loss, tower_mean_acc, \
+        cur_read_batch = sess.run([loss_op, acc_op, read_batch_size])
+        total_num_tested_data += cur_read_batch
+
+        batch_accuracy.append(tower_mean_acc)
+        batch_loss.append(tower_mean_loss)
+        batch_size.append(cur_read_batch)
+
+        show_running_info(model_settings, batch_accuracy,
+                          batch_loss, batch_size, data_size)
+
+    print('----------------------------------------------------------------')
+    print('Testing finished,')
+    print('')
+    print('Accuracy:', np.average(batch_accuracy, weights=batch_size))
+
+
 def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, data_size):
     start_time = model_settings['start_time']
     time_spent = datetime.now() - start_time

@@ -13,17 +13,18 @@ def show_running_info(model_settings, batch_sec, step, loss, accuracy):
     num_examples_per_step = model_settings['total_batch']
     epoch = model_settings['current_epoch']
     time_spent = datetime.now() - start_time
-    percentage_finished = step / model_settings['max_steps']
+    max_steps = model_settings['max_steps']
+    percentage_finished = step / max_steps
     if percentage_finished == 0:
         total_time = datetime.now()
     else:
         total_time = time_spent / percentage_finished
     time_left = total_time - time_spent
 
-    format_str = ('Epoch: %d, Step: %d, TimeLeft: %s, (%.3f'
+    format_str = ('Epoch: %d, Step: %d/%d, TimeLeft: %s, (%.3f'
                   'sec/batch), (accuracy: %f loss: %f)')
 
-    format_tuple = (epoch, step, time_left,
+    format_tuple = (epoch, step, max_steps, time_left,
                     batch_sec, accuracy, loss)
 
     print(format_str % format_tuple)
@@ -67,9 +68,26 @@ def set_summary_writers(model_settings, sess):
     return summary_writer
 
 
-def run_training(model_settings, sess):
-    model_settings['optimizer'] = tf.train.AdamOptimizer(model_settings['learning_rate'])
+def set_optimizer(model_settings):
+    global_step = tf.get_variable('Global_Step', [],
+                                  initializer=tf.constant_initializer(0),
+                                  trainable=False)
+    model_settings['global_step'] = global_step
+    starting_learning_rate = model_settings['learning_rate']
 
+    decay_step = model_settings['data_size'] * model_settings['decay_epoch']
+    decay_step = int(decay_step)
+    print('Decay step:', decay_step)
+    lr_decay = model_settings['lr_decay']
+
+    learning_rate = tf.train.exponential_decay(starting_learning_rate, global_step,
+                                               decay_step, lr_decay, staircase=True)
+    tf.summary.scalar('Learning Rate', learning_rate)
+
+    model_settings['optimizer'] = tf.train.AdamOptimizer(learning_rate)
+
+
+def run_training(model_settings, sess):
     set_model_settings(model_settings)
     # Set placeholders, queue operations and thread coordinator
     set_placeholders(model_settings)
@@ -82,14 +100,17 @@ def run_training(model_settings, sess):
                               model_settings)
 
     model_settings['input_list'] = input_list
-    data_size = len(input_list[0])
-    model_settings['max_steps'] = 1 + data_size \
+    model_settings['data_size'] = len(input_list[0])
+    model_settings['max_steps'] = 1 + model_settings['data_size'] \
                                   * model_settings['max_epoch'] \
                                   // model_settings['total_batch']
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()
     start_queue_threads(sess, model_settings)
+
+    # Set Optimizer
+    set_optimizer(model_settings)
 
     # Create Graph
     create_graph(model_settings)
@@ -119,13 +140,13 @@ def run_training(model_settings, sess):
     train_op, summary_op = model_settings['train_op'], model_settings['summary_op']
     loss_op, acc_op = model_settings['tower_mean_loss'], model_settings['tower_mean_accuracy']
 
-    print('Training data size: ', data_size)
+    print('Training data size: ', model_settings['data_size'])
     print('Training begins:')
     for step in range(model_settings['max_steps']):
         start_time = time.time()
         model_settings['global_step'] = step
         model_settings['current_epoch'] = \
-            (step * model_settings['total_batch']) // data_size
+            (step * model_settings['total_batch']) // model_settings['data_size']
 
         # Number of data enqueued
         # print(sess.run(model_settings['queue'].size()))
@@ -157,6 +178,7 @@ def run_training(model_settings, sess):
 # nohup tensorboard --logdir=./ &
 # ssh -L 16006:deeplearning7643-vm:6006 deeplearning7643@[ip_address]
 # kill -2 [pid]
+# ps -ef | grep python
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                           log_device_placement=False)) as sess:

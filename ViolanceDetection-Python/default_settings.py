@@ -4,7 +4,7 @@ from datetime import datetime
 model_settings = {
     # Training settings
     'max_epoch': 10,
-    'learning_rate': 2e-4,  # 1e-4 from previous code
+    'learning_rate': 1.6e-4,  # 1e-4 from previous code
     'lr_decay': 0.5,
     'decay_epoch': 3,
     'weight_decay': 0.00005,

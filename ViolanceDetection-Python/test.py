@@ -44,6 +44,7 @@ def run_testing(model_settings, sess):
                          model_settings['test_file_name']
     model_settings['input_list'] = get_data_dir(test_dir_locations,
                                                 model_settings)
+    model_settings['input_list'] = shuffle_list(*model_settings['input_list'])
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()
@@ -109,6 +110,7 @@ def extract_features(model_settings, sess):
                          model_settings['feature_extract_file_name']
     model_settings['input_list'] = get_data_dir(test_dir_locations,
                                                 model_settings)
+
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()

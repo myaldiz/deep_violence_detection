@@ -4,9 +4,9 @@ from datetime import datetime
 model_settings = {
     # Training settings
     'max_epoch': 10,
-    'learning_rate': 1e-3,  # 1e-4 from previous code
-    'lr_decay': 0.4,
-    'decay_epoch': 2,
+    'learning_rate': 2e-4,  # 1e-4 from previous code
+    'lr_decay': 0.5,
+    'decay_epoch': 3,
     'weight_decay': 0.00005,
     'dropout': 0.5,
     'summary_checkpoints': 50,  # Number of steps to create checkpoint

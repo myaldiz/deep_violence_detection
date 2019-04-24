@@ -56,11 +56,11 @@ model_settings = {
 
 
 def set_model_settings(model_settings):
-    # Settings for the local computer
-    model_settings['queue_size'] = 100
-    model_settings['num_thread'] = 1
-    model_settings['batch_sizes'] = [5]
-    model_settings['devices_to_run'] = ['/cpu:0']
+    # # Settings for the local computer
+    # model_settings['queue_size'] = 100
+    # model_settings['num_thread'] = 1
+    # model_settings['batch_sizes'] = [5]
+    # model_settings['devices_to_run'] = ['/cpu:0']
 
     # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
     model_settings['variable_storage'] = model_settings['devices_to_run'][0]

@@ -156,7 +156,6 @@ def extract_features(model_settings, sess):
 
 def train_svm(X_data, model_settings):
     y_data = model_settings['input_list'][1]
-    print(X_data.shape, len(y_data))
     X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3)
     classifier = svm.LinearSVC()
     classifier.fit(X_train, y_train)
@@ -191,4 +190,4 @@ def main2():
 
 
 if __name__ == '__main__':
-    main2()
+    main()

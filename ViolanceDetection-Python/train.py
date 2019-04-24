@@ -76,7 +76,7 @@ def set_optimizer(model_settings):
     starting_learning_rate = model_settings['learning_rate']
 
     decay_step = model_settings['data_size'] * model_settings['decay_epoch']
-    decay_step = int(decay_step)
+    decay_step = int(decay_step) // model_settings['total_batch']
     print('Decay step:', decay_step)
     lr_decay = model_settings['lr_decay']
 
@@ -144,7 +144,6 @@ def run_training(model_settings, sess):
     print('Training begins:')
     for step in range(model_settings['max_steps']):
         start_time = time.time()
-        model_settings['global_step'] = step
         model_settings['current_epoch'] = \
             (step * model_settings['total_batch']) // model_settings['data_size']
 

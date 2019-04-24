@@ -1,8 +1,9 @@
-import sys, os
+import sys
 import tensorflow as tf
 from modules import set_placeholders, set_queue, create_graph
 from modules import create_training_op, start_queue_threads
 from modules import stop_thread_runner
+from modules import make_dirs, time2string
 from preprocess import *
 from default_settings import model_settings, set_model_settings
 from datetime import datetime
@@ -28,19 +29,6 @@ def show_running_info(model_settings, batch_sec, step, loss, accuracy):
                     batch_sec, accuracy, loss)
 
     print(format_str % format_tuple)
-
-
-def make_dirs(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-def time2string(t):
-    out_str = str(t).split(' ')
-    interm = '-'.join(out_str[1].split(':')).split('.')
-    out_str[1] = interm[0]
-    # out_str.append(interm[1])
-    return '__'.join(out_str)
 
 
 def save_graph(model_settings, sess):

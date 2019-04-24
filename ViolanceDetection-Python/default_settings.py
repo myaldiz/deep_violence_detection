@@ -1,5 +1,6 @@
 import numpy as np
 from datetime import datetime
+from modules import make_dirs, time2string
 
 model_settings = {
     # Training settings
@@ -39,8 +40,8 @@ model_settings = {
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
     # 'model_read_loc': './models/s1m-ucf101.model',
-    'model_read_loc': './models/2019-04-24__17-19-58/UCF_finetune-2700',
-    # 'model_read_loc': './models/UCF_finetuneFC_last.model',
+    # 'model_read_loc': './models/2019-04-24__17-19-58/UCF_finetune-2700',
+    'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101-Frames/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
     'train_file_name': '/trainlist01.txt',
@@ -55,12 +56,20 @@ model_settings = {
 }
 
 
+def time2string(t):
+    out_str = str(t).split(' ')
+    interm = '-'.join(out_str[1].split(':')).split('.')
+    out_str[1] = interm[0]
+    # out_str.append(interm[1])
+    return '__'.join(out_str)
+
+
 def set_model_settings(model_settings):
-    # # Settings for the local computer
-    # model_settings['queue_size'] = 100
-    # model_settings['num_thread'] = 1
-    # model_settings['batch_sizes'] = [5]
-    # model_settings['devices_to_run'] = ['/cpu:0']
+    # Settings for the local computer
+    model_settings['queue_size'] = 100
+    model_settings['num_thread'] = 1
+    model_settings['batch_sizes'] = [5]
+    model_settings['devices_to_run'] = ['/cpu:0']
 
     # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
     model_settings['variable_storage'] = model_settings['devices_to_run'][0]
@@ -96,8 +105,18 @@ def set_model_settings(model_settings):
         model_settings['dequeue_immediately'] = False
 
     model_settings['start_time'] = datetime.now()
+    out_str = ""
     print('==-----------------Current model settings-----------------==')
     for key, value in model_settings.items():
         if type(value) != type(np.array([])):
-            print(key, ': ', value)
+            out_str += str(key) + ': ' + str(value) + '\n'
+
+    print(out_str)
+    if not model_settings['is_testing']:
+        summary_dir = model_settings['checkpoint_dir'] + model_settings['model_name']
+        summary_dir += '/' + time2string(model_settings['start_time']) + '/'
+        make_dirs(summary_dir)
+        summary_dir += 'network_settings.txt'
+        with open(summary_dir, 'w') as file:
+            file.write(out_str)
     print('-----------------==Current model settings==-----------------')

@@ -155,10 +155,9 @@ def process_frames(model_settings):
         # Crop the images
         clips_cropped = images_placeholder[:, x_start:x_end, y_start:y_end]
 
-        # Interpolate
-        # TODO: Try bilinear aswell for training!
-        # clips_interp = tf.image.resize_bilinear(clips_cropped, (crop_size, crop_size))
-        clips_interp = tf.image.resize_bicubic(clips_cropped, (crop_size, crop_size))
+        # Interpolate: may need to test which method is better!!!
+        clips_interp = tf.image.resize_bilinear(clips_cropped, (crop_size, crop_size))
+        # clips_interp = tf.image.resize_bicubic(clips_cropped, (crop_size, crop_size))
         clips_interp = tf.clip_by_value(clips_interp, 0, 255)
         last_frame = clips_interp[-1]
 

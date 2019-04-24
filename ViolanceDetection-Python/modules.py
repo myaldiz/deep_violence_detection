@@ -3,7 +3,7 @@ import threading
 from model import model, tower_loss, tower_accuracy
 from preprocess import read_clips_from_video, shuffle_list
 from preprocess import get_frames_data, process_frames
-
+import os
 
 def average_gradients(tower_grads):
     average_grads = []
@@ -214,3 +214,16 @@ def stop_thread_runner(sess, model_settings):
         if queue_size < model_settings['total_batch']:
             break
         sess.run(queue.dequeue_many(model_settings['total_batch']))
+
+
+def make_dirs(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def time2string(t):
+    out_str = str(t).split(' ')
+    interm = '-'.join(out_str[1].split(':')).split('.')
+    out_str[1] = interm[0]
+    # out_str.append(interm[1])
+    return '__'.join(out_str)

@@ -147,7 +147,7 @@ def tower_loss(loss_var_scope, logit, labels):
         cross_entropy_mean = tf.reduce_mean(cross_entropy, name='Cross_Entropy_Mean')
 
         weight_losses = tf.get_collection('losses')
-        tf.summary.scalar('Weight_decay_loss', tf.reduce_mean(weight_losses))
+        # tf.summary.scalar('Weight_decay_loss', tf.reduce_mean(weight_losses))
 
         tf.add_to_collection('losses', cross_entropy_mean)
         total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')

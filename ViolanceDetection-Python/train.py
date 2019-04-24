@@ -173,7 +173,7 @@ def run_training(model_settings, sess):
 
 
 # To run at the background
-# nohup python train.py &> train_out.txt &
+# nohup python3 train.py &> train_out.txt &
 # nohup tensorboard --logdir=./ &
 # ssh -L 16006:deeplearning7643-vm:6006 deeplearning7643@[ip_address]
 # kill -2 [pid]

@@ -9,7 +9,7 @@ model_settings = {
     'decay_epoch': 2,
     'weight_decay': 0.00005,
     'dropout': 0.5,
-    'summary_checkpoints': 100,  # Number of steps to create checkpoint
+    'summary_checkpoints': 50,  # Number of steps to create checkpoint
     'model_save_checkpoints': 300,
     'batch_sizes': [30],  # Batch per device -- Original total is 30
     'read_pretrained_model': True,  # ----Parameters to load----

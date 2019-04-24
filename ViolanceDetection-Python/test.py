@@ -182,10 +182,13 @@ def show_running_info(model_settings, batch_accuracy, batch_loss, batch_size, da
 #   - Showing top 3 classification
 # Fix multiple device support
 
+# To run at the background
+# nohup python test.py &> test_out.txt &
+# kill -2 [pid]
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                           log_device_placement=False)) as sess:
-    #with tf.Session() as sess:
+        # with tf.Session() as sess:
         run_testing(model_settings, sess)
 
 

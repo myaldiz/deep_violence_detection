@@ -8,14 +8,24 @@ from default_settings import model_settings, set_model_settings
 from datetime import datetime
 
 
-def show_running_info(model_settings, duration, step, loss, accuracy):
+def show_running_info(model_settings, batch_sec, step, loss, accuracy):
+    start_time = model_settings['start_time']
     num_examples_per_step = model_settings['total_batch']
     epoch = model_settings['current_epoch']
-    examples_per_sec = num_examples_per_step / duration
-    format_str = ('Epoch: %d, %s: step %d, (%.1f examples/sec; %.3f'
+    time_spent = datetime.now() - start_time
+    percentage_finished = step / model_settings['max_steps']
+    if percentage_finished == 0:
+        total_time = datetime.now()
+    else:
+        total_time = time_spent / percentage_finished
+    time_left = total_time - time_spent
+
+    format_str = ('Epoch: %d, Step: %d, TimeLeft: %s, (%.3f'
                   'sec/batch), (accuracy: %f loss: %f)')
-    format_tuple = (epoch, datetime.now(), step,
-                    examples_per_sec, duration, accuracy, loss)
+
+    format_tuple = (epoch, step, time_left,
+                    batch_sec, accuracy, loss)
+
     print(format_str % format_tuple)
 
 
@@ -70,8 +80,12 @@ def run_training(model_settings, sess):
                           model_settings['train_file_name']
     input_list = get_data_dir(train_dir_locations,
                               model_settings)
-    data_size = len(input_list[0])
+
     model_settings['input_list'] = input_list
+    data_size = len(input_list[0])
+    model_settings['max_steps'] = 1 + data_size \
+                                  * model_settings['max_epoch'] \
+                                  // model_settings['total_batch']
 
     # Initialize file thread Coordinator and Start input reading threads
     model_settings['coord'] = tf.train.Coordinator()
@@ -110,6 +124,9 @@ def run_training(model_settings, sess):
     for step in range(model_settings['max_steps']):
         start_time = time.time()
         model_settings['global_step'] = step
+        model_settings['current_epoch'] = \
+            (step * model_settings['total_batch']) // data_size
+
         # Number of data enqueued
         # print(sess.run(model_settings['queue'].size()))
 
@@ -128,12 +145,6 @@ def run_training(model_settings, sess):
         show_running_info(model_settings, time.time() - start_time,
                           step, tower_mean_loss, tower_mean_acc)
 
-        model_settings['current_epoch'] = (step * model_settings['total_batch']) \
-                                          // data_size
-
-        if model_settings['current_epoch'] == model_settings['max_epoch']:
-            break
-
     # Stop the input queue threads
     stop_thread_runner(sess, model_settings)
 
@@ -141,6 +152,11 @@ def run_training(model_settings, sess):
     save_graph(model_settings, sess)
 
 
+# To run at the background
+# nohup python train.py &> train_out.txt &
+# nohup tensorboard --logdir=./ &
+# ssh -L 16006:deeplearning7643-vm:6006 deeplearning7643@[ip_address]
+# kill -2 [pid]
 def main():
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True,
                                           log_device_placement=False)) as sess:

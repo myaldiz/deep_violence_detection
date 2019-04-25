@@ -4,11 +4,11 @@ from modules import make_dirs, time2string
 
 model_settings = {
     # Training settings
-    'max_epoch': 10,
-    'learning_rate': 1.6e-4,  # 1e-4 from previous code
+    'max_epoch': 8,
+    'learning_rate': 1e-4,  # 1e-4 from previous code
     'lr_decay': 0.5,
     'decay_epoch': 3,
-    'weight_decay': 0.00005,
+    'weight_decay': 0.0005,
     'dropout': 0.5,
     'summary_checkpoints': 50,  # Number of steps to create checkpoint
     'model_save_checkpoints': 300,
@@ -65,11 +65,11 @@ def time2string(t):
 
 
 def set_model_settings(model_settings):
-    # Settings for the local computer
-    model_settings['queue_size'] = 100
-    model_settings['num_thread'] = 1
-    model_settings['batch_sizes'] = [5]
-    model_settings['devices_to_run'] = ['/cpu:0']
+    # # Settings for the local computer
+    # model_settings['queue_size'] = 100
+    # model_settings['num_thread'] = 1
+    # model_settings['batch_sizes'] = [5]
+    # model_settings['devices_to_run'] = ['/cpu:0']
 
     # Storage of variables RAM:'/cpu:0' GPU:'/gpu:0'
     model_settings['variable_storage'] = model_settings['devices_to_run'][0]

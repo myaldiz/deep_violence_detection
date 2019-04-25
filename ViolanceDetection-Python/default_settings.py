@@ -8,7 +8,7 @@ model_settings = {
     'learning_rate': 1e-4,  # 1e-4 from previous code
     'lr_decay': 0.5,
     'decay_epoch': 3,
-    'weight_decay': 0.0007,
+    'weight_decay': 0.0004,
     'dropout': 0.5,
     'summary_checkpoints': 50,  # Number of steps to create checkpoint
     'model_save_checkpoints': 300,
@@ -40,7 +40,7 @@ model_settings = {
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
     # 'model_read_loc': './models/s1m-ucf101.model',
-    'model_read_loc': './models/2019-04-25__17-13-56/UCF_finetune-1592',
+    'model_read_loc': './models/2019-04-25__17-13-56/UCF_finetune-1636',
     # 'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101-Frames/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',

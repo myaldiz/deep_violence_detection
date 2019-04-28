@@ -4,14 +4,14 @@ from modules import make_dirs, time2string
 
 model_settings = {
     # Training settings
-    'max_epoch': 8,
+    'max_epoch': 6,
     'learning_rate': 1e-4,  # 1e-4 from previous code
-    'lr_decay': 0.5,
-    'decay_epoch': 3,
-    'weight_decay': 0.0005,
+    'lr_decay': 0.6,
+    'decay_epoch': 2.5,
+    'weight_decay': 0.0004,
     'dropout': 0.5,
     'summary_checkpoints': 50,  # Number of steps to create checkpoint
-    'model_save_checkpoints': 300,
+    'model_save_checkpoints': 400,
     'batch_sizes': [30],  # Batch per device -- Original total is 30
     'read_pretrained_model': True,  # ----Parameters to load----
     'load_fc6_fc7': True,
@@ -39,8 +39,8 @@ model_settings = {
     'model_name': 'UCF_finetune',
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
-    'model_read_loc': './models/sport1m.model',
-    # 'model_read_loc': './models/2019-04-25__17-13-56/UCF_finetune-1636',
+    #'model_read_loc': './models/sport1m.model',
+    'model_read_loc': './models/2019-04-25__15-12-49/UCF_finetune-1347',
     # 'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101-Frames/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',

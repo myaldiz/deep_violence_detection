@@ -44,7 +44,7 @@ model_settings = {
     # 'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101-Frames/',
     'train_test_loc': '../datasets/UCF-ActionRecognitionSplits',
-    'train_file_name': '/trainlist01.txt',
+    'train_file_name': '/testlist01.txt',
     # 'train_file_name': '/train_small.txt',
     'test_file_name': '/testlist01.txt',
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy',

@@ -50,10 +50,10 @@ model_settings = {
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy',
 
     # Feature Extraction Directory Settings
-    # 'feature_data_home': '../datasets/HockeyFights/',
-    'feature_data_home': '../datasets/Peliculas/',
-    # 'feature_loc': '../datasets/HockeyFights-Splits',
-    'feature_loc': '../datasets/Peliculas-Splits',
+    'feature_data_home': '../datasets/HockeyFights/',
+    # 'feature_data_home': '../datasets/Peliculas/',
+    'feature_loc': '../datasets/HockeyFights-Splits',
+    # 'feature_loc': '../datasets/Peliculas-Splits',
     'feature_extract_file_name': '/datalist.txt'
 }
 

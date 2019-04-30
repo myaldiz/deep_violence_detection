@@ -39,7 +39,7 @@ model_settings = {
     'model_name': 'UCF_finetune',
     'checkpoint_dir': './checkpoints/',
     'model_save_dir': './models/',
-    #'model_read_loc': './models/sport1m.model',
+    # 'model_read_loc': './models/sport1m.model',
     'model_read_loc': './models/2019-04-25__15-12-49/UCF_finetune-1347',
     # 'model_read_loc': './models/UCF_finetuneFC_last.model',
     'data_home': '../datasets/UCF-101-Frames/',
@@ -50,8 +50,10 @@ model_settings = {
     'mean_clip_loc': '../datasets/PreprocessData/crop_mean.npy',
 
     # Feature Extraction Directory Settings
-    'feature_data_home': '../datasets/HockeyFights/',
-    'feature_loc': '../datasets/HockeyFights-Splits',
+    # 'feature_data_home': '../datasets/HockeyFights/',
+    'feature_data_home': '../datasets/Peliculas/',
+    # 'feature_loc': '../datasets/HockeyFights-Splits',
+    'feature_loc': '../datasets/Peliculas-Splits',
     'feature_extract_file_name': '/datalist.txt'
 }
 

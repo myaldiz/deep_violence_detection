@@ -98,7 +98,7 @@ def run_testing(model_settings, sess):
 
 def extract_features(model_settings, sess):
     model_settings['is_testing'] = True
-    model_settings['read_from_frames'] = False
+    # model_settings['read_from_frames'] = False
     model_settings['data_home'] = model_settings['feature_data_home']
     set_model_settings(model_settings)
 

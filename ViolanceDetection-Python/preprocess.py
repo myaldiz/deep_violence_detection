@@ -11,7 +11,9 @@ def get_data_dir(filename, model_settings):
     dir_videos, label_videos = [], []
     with open(filename, 'r') as input_file:
         for line in input_file:
-            file_name, label = line.split(' ')
+            line_vals = line.split(' ')
+            label = line_vals[-1]
+            file_name = ' '.join(line_vals[:-1])
             # if will read from frames
             if model_settings['read_from_frames']:
                 file_name = '.'.join(file_name.split('.')[:-1])
@@ -34,6 +36,7 @@ def shuffle_list(dir_videos, label_videos, seed=time.time()):
 # Given video directory it reads the video
 # extracts the frames, and do pre-processing operation
 def read_clips_from_video(dirname, model_settings):
+    print('Dirname: ', dirname)
     # Input size for the network
     frames_per_batch = model_settings['frames_per_batch']
     video_fps = model_settings['video_fps']
@@ -47,7 +50,9 @@ def read_clips_from_video(dirname, model_settings):
 
     # Video information
     probe = ffmpeg.probe(dirname)
-    video_info = probe["streams"][0]
+    for video_info in probe['streams']:
+        if 'width' in video_info:
+            break
     video_width = video_info["width"]
     video_height = video_info["height"]
     video_duration = float(video_info["duration"])
